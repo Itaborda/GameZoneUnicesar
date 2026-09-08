@@ -35,7 +35,7 @@
     - Seller
     - PersonPersistence
     - PersonService
-- Feature branch: [feature/product-module]
+- Feature branch: [feature/person-module]
 
 ## Committed Activities
 
