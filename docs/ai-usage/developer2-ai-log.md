@@ -53,4 +53,10 @@ ChatGPT
 
 **Use of AI:** Clarification of the required repository structure.
 
+## Entry 5 -Persistence (PersonRepository)
 
+- Asked Claude for help with saving and loading person data to/from a file
+  (CSV format), and to add JavaDoc documentation to the class.
+## Entry 6 - Service (PersonService)
+
+- Asked Claude for help with JavaDoc documentation for the PersonService class.
