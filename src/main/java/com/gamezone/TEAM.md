@@ -35,7 +35,7 @@
     - Seller
     - PersonPersistence
     - PersonService
-- Feature branch: [AQUÍ VA EL NOMBRE DE SU RAMA]
+- Feature branch: [feature/product-module]
 
 ## Committed Activities
 
