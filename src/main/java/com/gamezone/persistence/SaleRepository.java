@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Handles the persistence of sales.
  */
-public class SalePersistence {
+public class SaleRepository {
 
     private final List<Sale> sales;
     private final String filePath;
@@ -19,7 +19,7 @@ public class SalePersistence {
     /**
      * Creates a new sale persistence manager.
      */
-    public SalePersistence() {
+    public SaleRepository() {
         this.sales = new ArrayList<>();
         this.filePath = "sales.csv";
     }

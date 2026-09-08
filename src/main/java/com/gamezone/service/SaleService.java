@@ -2,7 +2,7 @@ package com.gamezone.service;
 
 import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
-import com.gamezone.persistence.SalePersistence;
+import com.gamezone.persistence.SaleRepository;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class SaleService {
 
-    private final SalePersistence salePersistence;
+    private final SaleRepository salePersistence;
     private final ProductService productService;
 
     /**
@@ -20,7 +20,7 @@ public class SaleService {
      * @param salePersistence the persistence manager for sales
      * @param productService the service used to manage products and stock
      */
-    public SaleService(SalePersistence salePersistence, ProductService productService) {
+    public SaleService(SaleRepository salePersistence, ProductService productService) {
         this.salePersistence = salePersistence;
         this.productService = productService;
     }
