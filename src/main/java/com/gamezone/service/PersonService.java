@@ -1,4 +1,4 @@
-package com.gamezone.services;
+package com.gamezone.service;
 
 import com.gamezone.model.Customer;
 import com.gamezone.model.Person;
