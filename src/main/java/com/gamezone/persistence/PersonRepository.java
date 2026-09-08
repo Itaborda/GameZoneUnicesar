@@ -1,4 +1,4 @@
-package com.gamezone.persistance;
+package com.gamezone.persistence;
 
 import com.gamezone.model.Customer;
 import com.gamezone.model.Person;
