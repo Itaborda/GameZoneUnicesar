@@ -98,4 +98,8 @@
 **Analysis & Answer:**
 * **Allowed Dependencies:** The flow is strictly unidirectional from top to bottom: `ui` depends on `service`; `service` depends on `persistence` and `model`; `persistence` depends only on `model`; `model` does not depend on any other layer.
 * **Prohibited Dependencies:** Cross-layer jumps (e.g., `ui` accessing `persistence` directly) and circular dependencies (e.g., `model` referencing `ui` or `service`) are strictly forbidden.
+<<<<<<< HEAD
 * **Justification:** This structure ensures loose coupling and maintainability. Upper layers can use the features of lower layers, but lower layers remain completely unaware of how their data is displayed or where it comes from.
+=======
+* **Justification:** This structure ensures loose coupling and maintainability. Upper layers can use the features of lower layers, but lower layers remain completely unaware of how their data is displayed or where it comes from.
+>>>>>>> 77a9327bf74e8f3486f1b4aa3a65ac141457dc7d
