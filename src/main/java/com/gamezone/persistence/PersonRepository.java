@@ -38,7 +38,7 @@ public class PersonRepository {
             for(Person p: person){
                 String line="";
                 if (p instanceof Customer) {
-                    Customer c = (Customer) person;
+                    Customer c = (Customer) p;
                     line = c.getRole() + ","
                             + c.getId() + ","
                             + c.getName() + ","
