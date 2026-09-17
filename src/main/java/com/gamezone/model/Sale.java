@@ -143,6 +143,13 @@ public class Sale {
 
         return total;
     }
+    /**
+     * Determines whether this sale is still eligible for a return,
+     * that is, whether the current date falls within the 30 calendar
+     * days following the sale's date.
+     *
+     * @return true if the sale is within its 30-day return window, false otherwise
+     */
     public boolean canBeReturned() {
         if (date == null || date.isBlank()) {
             return false;
