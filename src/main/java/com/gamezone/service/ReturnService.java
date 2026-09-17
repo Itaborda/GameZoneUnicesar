@@ -8,19 +8,51 @@ import com.gamezone.persistence.ReturnRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Service responsible for managing product returns within the system.
+ * <p>
+ * Handles the registration of new returns, validation against the original
+ * sale, stock restoration for returned products, and querying of existing
+ * returns by customer or sale. It also supports generating a monthly
+ * financial balance that accounts for both sales and returns.
+ */
 public class ReturnService {
     private final ReturnRepository returnRepository;
     private final SaleService saleService;
     private final ProductService productService;
     private final List<Return> returns;
-
+    /**
+     * Constructs a new {@code ReturnService}.
+     *
+     * @param productService   the service used to manage product stock
+     * @param returnRepository the repository used to persist returns
+     * @param saleService      the service used to look up existing sales
+     * @param returns          the in-memory list of registered returns
+     */
     public ReturnService(ProductService productService, ReturnRepository returnRepository, SaleService saleService, List<Return> returns) {
         this.productService = productService;
         this.returnRepository = returnRepository;
         this.saleService = saleService;
         this.returns = returns;
     }
+    /**
+     * Registers a new return for a given sale.
+     * <p>
+     * Validates that the sale exists and is still within the allowed return
+     * period (30 days). Each product id provided must belong to the original
+     * sale; otherwise, an exception is thrown. Once validated, the refund
+     * amount is calculated, the stock of each returned product is restored,
+     * and the new return is persisted.
+     *
+     * @param saleId     the id of the original sale
+     * @param productIds the ids of the products being returned
+     * @param reason     the reason for the return
+     * @return the newly created {@link Return}
+     * @throws IllegalArgumentException if the sale does not exist, if it can
+     *                                   no longer be returned (more than 30
+     *                                   days have passed), or if any product
+     *                                   id does not belong to the sale
+     */
     public Return registerReturn(String saleId, List<String> productIds, String reason) {
 
         Sale sale = null;
@@ -69,9 +101,21 @@ public class ReturnService {
 
         return newReturn;
     }
+    /**
+     * Returns all registered returns.
+     *
+     * @return a list containing every {@link Return} registered in the system
+     */
     public List<Return> viewAllReturns() {
         return returns;
     }
+    /**
+     * Retrieves all returns associated with a given customer.
+     *
+     * @param customerId the id of the customer
+     * @return a list of {@link Return} instances belonging to sales made by
+     *         the specified customer
+     */
     public List<Return> viewReturnsByCustomer(String customerId) {
         List<Return> result = new ArrayList<>();
 
@@ -83,6 +127,12 @@ public class ReturnService {
 
         return result;
     }
+    /**
+     * Retrieves all returns associated with a given sale.
+     *
+     * @param saleId the id of the original sale
+     * @return a list of {@link Return} instances linked to the specified sale
+     */
     public List<Return> viewReturnsBySale(String saleId) {
         List<Return> result = new ArrayList<>();
 
@@ -94,6 +144,15 @@ public class ReturnService {
 
         return result;
     }
+    /**
+     * Calculates the net monthly balance for a given month and year, defined
+     * as the total sales amount minus the total refunded amount from returns.
+     *
+     * @param month the month to evaluate (1-12)
+     * @param year  the year to evaluate
+     * @return the net balance (total sales minus total returns) for the
+     *         specified month and year
+     */
     public double generateMonthlyBalance(int month, int year) {
         double totalSales = 0;
         double totalReturns = 0;
