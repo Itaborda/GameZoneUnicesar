@@ -3,6 +3,7 @@ package com.gamezone.persistence;
 import com.gamezone.model.Sale;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,6 +31,10 @@ public class SaleRepository {
      * @param sale the sale to save
      */
     public void save(Sale sale) {
+        File file = new File(filePath); File parent = file.getParentFile();
+        if(parent!=null && !parent.exists()){
+            parent.mkdirs();
+        }
         sales.add(sale);
 
         try (BufferedWriter writer = new BufferedWriter(

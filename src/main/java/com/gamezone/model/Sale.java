@@ -1,4 +1,7 @@
 package com.gamezone.model;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 
@@ -126,14 +129,11 @@ public class Sale {
         this.products = products;
     }
 
-
-
     /**
      * Calculates the total price of all products in the sale.
      *
      * @return the total price of the sale
-     */
-
+     * */
     public double calculateTotal() {
         double total = 0;
 
@@ -143,4 +143,28 @@ public class Sale {
 
         return total;
     }
+    /**
+     * Determines whether this sale is still eligible for a return,
+     * that is, whether the current date falls within the 30 calendar
+     * days following the sale's date.
+     *
+     * @return true if the sale is within its 30-day return window, false otherwise
+     */
+    public boolean canBeReturned() {
+        if (date == null || date.isBlank()) {
+            return false;
+        }
+
+        try {
+            LocalDate saleDate = LocalDate.parse(date);
+            LocalDate today = LocalDate.now();
+
+            long daysSinceSale = ChronoUnit.DAYS.between(saleDate, today);
+
+            return daysSinceSale >= 0 && daysSinceSale <= 30;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+    }
+
 }
