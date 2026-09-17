@@ -3,6 +3,12 @@ package com.gamezone.model;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Represents a return of previously purchased products in the
+ * GameZone store. A return always references the original sale it
+ * belongs to and holds the subset of products being returned, along
+ * with the reason for the return and the refunded amount.
+ */
 public class Return {
 
     private String returnId;
@@ -12,6 +18,16 @@ public class Return {
     private String reason;
     private double refundAmount;
 
+    /**
+     * Creates a new return with the given information.
+     *
+     * @param returnId         the return's unique identifier
+     * @param returnDate       the date the return was registered
+     * @param originalSale     the sale the returned products belong to
+     * @param returnedProducts the products being returned
+     * @param reason           the reason for the return
+     * @param refundAmount     the amount to be refunded for the return
+     */
     public Return(String returnId, LocalDate returnDate, Sale originalSale, List<Product> returnedProducts, String reason, double refundAmount) {
         this.returnId = returnId;
         this.returnDate = returnDate;
@@ -21,32 +37,69 @@ public class Return {
         this.refundAmount = refundAmount;
     }
 
+    /**
+     * Returns the return's unique identifier.
+     *
+     * @return the return's id
+     */
     public String getReturnId() {
         return returnId;
     }
 
-
+    /**
+     * Returns the date the return was registered.
+     *
+     * @return the return's date
+     */
     public LocalDate getReturnDate() {
         return returnDate;
     }
 
+    /**
+     * Returns the sale the returned products belong to. This
+     * relationship is immutable, so no setter is provided for it.
+     *
+     * @return the original sale
+     */
     public Sale getOriginalSale() {
         return originalSale;
     }
 
-
+    /**
+     * Returns the products being returned. This relationship is
+     * immutable, so no setter is provided for it.
+     *
+     * @return the list of returned products
+     */
     public List<Product> getReturnedProducts() {
         return returnedProducts;
     }
 
+    /**
+     * Returns the reason given for the return.
+     *
+     * @return the return's reason
+     */
     public String getReason() {
         return reason;
     }
 
+    /**
+     * Returns the amount refunded for this return.
+     *
+     * @return the refund amount
+     */
     public double getRefundAmount() {
         return refundAmount;
     }
 
+    /**
+     * Calculates the refund amount by summing the price of every
+     * returned product, assigns the resulting value to this return,
+     * and returns it.
+     *
+     * @return the calculated refund amount
+     */
     public double calculateRefundAmount() {
         double total = 0;
 
@@ -59,6 +112,14 @@ public class Return {
         return refundAmount;
     }
 
+    /**
+     * Generates a formatted receipt, in Spanish, describing this
+     * return: its identifier, date, the original sale it references,
+     * the returned products with their prices, the reason, and the
+     * refunded amount.
+     *
+     * @return a formatted string describing the return
+     */
     public String generateReturnReceipt() {
         StringBuilder receipt = new StringBuilder();
 
