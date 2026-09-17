@@ -15,6 +15,18 @@ public class SaleService {
     private ProductService productService;
 
 
+    /**
+     * Creates a sale service with its required dependencies.
+     *
+     * @param salePersistence repository used to store sales
+     * @param productService service used to manage product stock
+     */
+    public SaleService(SaleRepository salePersistence,
+                       ProductService productService) {
+        this.salePersistence = salePersistence;
+        this.productService = productService;
+    }
+
 
     /**
      * Registers a sale if it contains at least one product and
