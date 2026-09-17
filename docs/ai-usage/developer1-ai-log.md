@@ -34,3 +34,11 @@
 **Question or query:** Review of my ProductService implementation (registerProduct, getAllProducts, findById, updateStock) against the class diagram and the business rules from the context document.
 **Summary of response:** Confirmed the class matched the diagram's fields and method signatures, and that it satisfied the business rules (auto-load on construction, auto-save after changes, stock validation before deducting inventory). Flagged that throwing IllegalArgumentException means the caller (SaleService) must catch it, and that exception messages should stay in English (technical/developer-facing) while user-facing text (like getDescription()) can stay in Spanish, since they serve different audiences.
 **Decision made:** Kept the IllegalArgumentException approach and will inform the Technical Lead that SaleService needs a try-catch around updateStock() calls.
+
+---
+
+## 2026-09-16 - Return domain model fix and return validation
+**Tool:** Claude / Query support
+**Question or query:** Review of the Return class and the canBeReturned() method in Sale, which were left incomplete in a previous session, to verify which adjustments were still needed according to the requirements.
+**Summary of response:** It was identified that Return had an unused import (ArrayList), disorganized imports, and missing JavaDoc documentation. In canBeReturned(), it was detected that the method did not validate whether the date was null or blank (which could throw a DateTimeParseException), and that the 30-day range calculation needed to be adjusted using ChronoUnit.DAYS.between().
+**Decision made:** I cleaned up the imports, added the corresponding JavaDoc to both parts, and restructured the logic of canBeReturned() by adding null/blank validation and exception handling. I also decided to split the work into atomic commits (imports, JavaDoc, and logic separately) to keep the repository history organized.
