@@ -13,7 +13,7 @@ public class ProductService {
     /**
      * Repository used for persisting and retrieving product data.
      */
-    private ProductRepository productRepository;
+    ProductRepository repository = new ProductRepository("data/product.csv");
 
     /**
      * In-memory cache of the list of products.
@@ -27,7 +27,7 @@ public class ProductService {
      * @param productRepository The repository instance to be used for data operations.
      */
     public ProductService(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+        this.repository = productRepository;
         this.products = productRepository.findAll();
     }
 
@@ -39,7 +39,7 @@ public class ProductService {
      */
     public void registerProduct(Product product) {
         products.add(product);
-        productRepository.saveAll(products);
+        repository.saveAll(products);
     }
 
     /**
@@ -94,6 +94,6 @@ public class ProductService {
 
         product.setStockQuantity(product.getStockQuantity() - quantity);
 
-        productRepository.saveAll(products);
+        repository.saveAll(products);
     }
 }

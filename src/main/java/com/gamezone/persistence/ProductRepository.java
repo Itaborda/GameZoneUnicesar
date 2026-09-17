@@ -17,7 +17,14 @@ import java.util.List;
  */
 public class ProductRepository {
 
-    private String filePath;
+    private final String filePath;
+
+    /**
+     * Creates a new ProductRepository using the default file path.
+     */
+    public ProductRepository() {
+        this.filePath = "data/product.csv";
+    }
 
     /**
      * Creates a new ProductRepository with the specified file path.
@@ -27,7 +34,6 @@ public class ProductRepository {
     public ProductRepository(String filePath) {
         this.filePath = filePath;
     }
-
     /**
      * Saves all products to the configured file.
      *
@@ -38,6 +44,10 @@ public class ProductRepository {
      * @param products the list of products to save
      */
     public void saveAll(List<Product> products) {
+        File file = new File(filePath); File parent = file.getParentFile();
+        if(parent!=null && !parent.exists()){
+            parent.mkdirs();
+        }
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
 
             for (Product product : products) {

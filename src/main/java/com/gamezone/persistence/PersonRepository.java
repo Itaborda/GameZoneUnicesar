@@ -15,6 +15,13 @@ import java.util.List;
 public class PersonRepository {
     private String filePath;
     /**
+     * Creates a new PersonRepository using the default file path.
+     */
+    public PersonRepository() {
+        this.filePath = "data/person.csv";
+    }
+
+    /**
      * Creates a new repository that reads from and writes to the
      * given file path.
      *
@@ -23,6 +30,7 @@ public class PersonRepository {
     public PersonRepository(String filePath) {
         this.filePath = filePath;
     }
+
     /**
      * Saves the given list of people to the file, overwriting its
      * previous content. Each line represents one person, with the
@@ -32,6 +40,11 @@ public class PersonRepository {
      * @param person the list of people to save
      */
     public void save (List<Person> person){
+        File file = new File(filePath); File parent = file.getParentFile();
+        if(parent!=null && !parent.exists()){
+            parent.mkdirs();
+        }
+
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write("role,id,name,phone,email,codeEmployee,shift");
             writer.newLine();
