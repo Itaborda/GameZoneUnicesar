@@ -1,7 +1,7 @@
 package com.gamezone.model;
 
-import java.time.LocalDate; import java.util.ArrayList; import
-        java.util.List;
+import java.time.LocalDate;
+import java.util.List;
 
 public class Return {
 
@@ -12,11 +12,11 @@ public class Return {
     private String reason;
     private double refundAmount;
 
-    public Return(Sale originalSale, List<Product> returnedProducts, String returnId, LocalDate returnDate, String reason, double refundAmount) {
-        this.originalSale = originalSale;
-        this.returnedProducts = returnedProducts;
+    public Return(String returnId, LocalDate returnDate, Sale originalSale, List<Product> returnedProducts, String reason, double refundAmount) {
         this.returnId = returnId;
         this.returnDate = returnDate;
+        this.originalSale = originalSale;
+        this.returnedProducts = returnedProducts;
         this.reason = reason;
         this.refundAmount = refundAmount;
     }
@@ -25,6 +25,7 @@ public class Return {
         return returnId;
     }
 
+
     public LocalDate getReturnDate() {
         return returnDate;
     }
@@ -32,6 +33,7 @@ public class Return {
     public Sale getOriginalSale() {
         return originalSale;
     }
+
 
     public List<Product> getReturnedProducts() {
         return returnedProducts;
@@ -46,43 +48,36 @@ public class Return {
     }
 
     public double calculateRefundAmount() {
-    double total = 0;
+        double total = 0;
 
-    for (Product product : returnedProducts) {
-        total += product.getPrice();
+        for (Product product : returnedProducts) {
+            total += product.getPrice();
+        }
+
+        this.refundAmount = total;
+
+        return refundAmount;
     }
 
-    refundAmount = total;
-    return refundAmount;
+    public String generateReturnReceipt() {
+        StringBuilder receipt = new StringBuilder();
+
+        receipt.append("\n===== COMPROBANTE DE DEVOLUCION =====\n");
+        receipt.append("Identificador: ").append(returnId).append("\n");
+        receipt.append("Fecha: ").append(returnDate).append("\n");
+        receipt.append("Venta original: ").append(originalSale.getSaleId()).append("\n");
+        receipt.append("Productos devueltos:\n");
+
+        for (Product product : returnedProducts) {
+            receipt.append("- ").append(product.getTitle())
+                    .append(" | Precio: $").append(product.getPrice())
+                    .append("\n");
+        }
+
+        receipt.append("Motivo: ").append(reason).append("\n");
+        receipt.append("Monto reembolsado: $").append(refundAmount).append("\n");
+        receipt.append("====================================\n");
+
+        return receipt.toString();
     }
- public String generateReturnReceipt() {
-    StringBuilder receipt = new StringBuilder();
-
-    receipt.append("\n===== COMPROBANTE DE DEVOLUCIÓN =====\n");
-    receipt.append("Identificador: ").append(returnId).append("\n");
-    receipt.append("Fecha: ").append(returnDate).append("\n");
-    receipt.append("Venta original: ")
-            .append(originalSale.getSaleId())
-            .append("\n");
-
-    receipt.append("Productos devueltos:\n");
-
-    for (Product product : returnedProducts) {
-        receipt.append("- ")
-                .append(product.getTitle())
-                .append(" | Precio: $")
-                .append(product.getPrice())
-                .append("\n");
-    }
-
-    receipt.append("Motivo: ").append(reason).append("\n");
-    receipt.append("Monto reembolsado: $")
-            .append(refundAmount)
-            .append("\n");
-
-    receipt.append("====================================\n");
-
-    return receipt.toString();
-}
-
 }
