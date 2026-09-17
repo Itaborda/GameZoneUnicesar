@@ -87,6 +87,7 @@ public class ReturnRepository {
      * @return a list containing all returns found in the file, or an
      *         empty list if the file does not exist
      */
+
 public List<Return> loadAll() {
     List<Return> returns = new ArrayList<>();
     File file = new File(filePath);
