@@ -21,7 +21,7 @@ public class SaleRepository {
      */
     public SaleRepository() {
         this.sales = new ArrayList<>();
-        this.filePath = "sales.csv";
+        this.filePath = "Data/Sales.csv";
     }
 
     /**
