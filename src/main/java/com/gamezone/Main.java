@@ -27,7 +27,7 @@ public class Main {
 
                 // Services
                 ProductService productService =
-                        new ProductService(productRepository);
+                        new ProductService();
 
                 List<Person> people =
                         personRepository.findAll();
@@ -36,7 +36,7 @@ public class Main {
                         new PersonService(personRepository, people);
 
                 SaleService saleService =
-                        new SaleService(saleRepository, productService);
+                        new SaleService();
 
                 // Main Menu
                 MainMenu mainMenu =
