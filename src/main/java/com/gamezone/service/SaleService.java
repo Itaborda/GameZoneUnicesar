@@ -11,19 +11,10 @@ import java.util.List;
  */
 public class SaleService {
 
-    private final SaleRepository salePersistence;
-    private final ProductService productService;
+    private  SaleRepository salePersistence;
+    private ProductService productService;
 
-    /**
-     * Creates a new sale service.
-     *
-     * @param salePersistence the persistence manager for sales
-     * @param productService the service used to manage products and stock
-     */
-    public SaleService(SaleRepository salePersistence, ProductService productService) {
-        this.salePersistence = salePersistence;
-        this.productService = productService;
-    }
+
 
     /**
      * Registers a sale if it contains at least one product and

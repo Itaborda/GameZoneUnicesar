@@ -21,17 +21,6 @@ public class ProductService {
     private List<Product> products;
 
     /**
-     * Constructs a new {@code ProductService} instance and initializes the
-     * in-memory product list with all records currently stored in the repository.
-     *
-     * @param productRepository The repository instance to be used for data operations.
-     */
-    public ProductService(ProductRepository productRepository) {
-        this.repository = productRepository;
-        this.products = productRepository.findAll();
-    }
-
-    /**
      * Registers a new product by appending it to the in-memory list
      * and persisting the entire collection back to the repository.
      *
