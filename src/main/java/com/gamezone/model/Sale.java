@@ -143,21 +143,21 @@ public class Sale {
 
         return total;
     }
-
-        public boolean canBeReturned() { if (date == null || date.isBlank()) {
-            return false; }
-
-            try {
-                LocalDate saleDate = LocalDate.parse(date);
-                LocalDate today = LocalDate.now();
-
-                long days = ChronoUnit.DAYS.between(saleDate, today);
-
-                return days >= 0 && days <= 30;
-
-            } catch (DateTimeParseException e) {
-                return false;
-            }
-
+    public boolean canBeReturned() {
+        if (date == null || date.isBlank()) {
+            return false;
         }
+
+        try {
+            LocalDate saleDate = LocalDate.parse(date);
+            LocalDate today = LocalDate.now();
+
+            long daysSinceSale = ChronoUnit.DAYS.between(saleDate, today);
+
+            return daysSinceSale >= 0 && daysSinceSale <= 30;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+    }
+
 }
