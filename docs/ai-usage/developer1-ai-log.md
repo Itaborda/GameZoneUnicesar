@@ -58,3 +58,11 @@
 **Question or query:** Claude was asked to review the already implemented `Promotion` class hierarchy (`Promotion`, `PercentageDiscount`, `CategoryDiscount`, `BulkPurchaseDiscount`) to verify full compliance with the constraints specified in Requirement 2.
 **Summary of response:** Claude reviewed the existing code and recommended adding validation to the `Promotion` class to ensure that `startDate` is never later than `endDate`. The current implementation did not prevent this, silently causing `isActive()` to always return `false` without triggering an error.
 **Decision made:** The recommendation was followed, and a private `validateDateRange()` method was added to `Promotion`. This method is invoked by the constructor and by `setStartDate()`/`setEndDate()`, thereby centralizing the check in a single location rather than repeating it in three places.
+
+---
+
+## 18/09/2026 - Review of validations for the `Warranty` module
+**Tool:** Claude
+**Question or query:** Claude was asked to review the already implemented `Warranty` class hierarchy (`Warranty`, `BasicWarranty`, `ExtendedWarranty`) to identify any missing validations before finalizing Requirement 4.
+**Summary of response:** Claude reviewed the existing code and suggested modifications to two files. For `Warranty`, it recommended validating that `id`, `product`, `sale`, and `startDate` are not null within the constructor; otherwise, a null `startDate` would trigger a `NullPointerException` when calculating the end date. For `BasicWarranty`, it recommended validating that the associated product is an instance of `Console`, based on the business rule that only consoles generate an automatic basic warranty.
+**Decision made:** Both recommendations were adopted: null-value validation was added to the `Warranty` constructor, and a check was incorporated in the `BasicWarranty` constructor that throws an `IllegalArgumentException` if the product is not a `Console`.
