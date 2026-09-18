@@ -25,7 +25,7 @@ public class WarrantyRepository {
      * @param productRepository the repository used to resolve product references
      * @param saleRepository    the repository used to resolve sale references
      */
-    public WarrantyRepository(String filePath, ProductRepository productRepository, SaleRepository saleRepository) {
+    public WarrantyRepository(ProductRepository productRepository, SaleRepository saleRepository) {
         this.filePath = "data/warranty.csv";
         this.productRepository = productRepository;
         this.saleRepository = saleRepository;
