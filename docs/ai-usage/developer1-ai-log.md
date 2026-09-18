@@ -50,3 +50,11 @@
 **Question or query:** Reviewing the best way to structure the `Accessory` class hierarchy (`Controller`, `Cable`, and `Memory` extending `Product`) to reuse existing attributes and properly model console compatibility according to Requirement 1.
 **Summary of response:** Reviewed the approach of making `Accessory` extend `Product` directly so it inherits base fields (`id`, `title`, `price`, `stockQuantity`). Analyzed modeling compatibility using a `List<String>` of console IDs in `Accessory` to keep it decoupled from the full `Console` object, which simplifies filtering in `AccessoryService`. Also looked at having `Accessory` define a base `getDescription()` that subclasses override using `super.getDescription()` to append specific details without repeating code.
 **Decision made:** Created `Accessory` as an abstract class with the compatibility list and helper methods (`addCompatibleConsole`, `removeCompatibleConsole`, `isCompatibleWith`). Implemented the concrete subclasses `Controller` (with `connectionType`), `Cable` (with `lengthInMeters`, `connectorType`), and `Memory` (with `capacityInGigabytes`, `memoryType`). Documented these design choices to answer the team's analysis questions in `docs/accessory-analysis.md`.
+
+---
+
+## 18/09/2026 - Date range validation for the `Promotion` class
+**Tool:** Claude
+**Question or query:** Claude was asked to review the already implemented `Promotion` class hierarchy (`Promotion`, `PercentageDiscount`, `CategoryDiscount`, `BulkPurchaseDiscount`) to verify full compliance with the constraints specified in Requirement 2.
+**Summary of response:** Claude reviewed the existing code and recommended adding validation to the `Promotion` class to ensure that `startDate` is never later than `endDate`. The current implementation did not prevent this, silently causing `isActive()` to always return `false` without triggering an error.
+**Decision made:** The recommendation was followed, and a private `validateDateRange()` method was added to `Promotion`. This method is invoked by the constructor and by `setStartDate()`/`setEndDate()`, thereby centralizing the check in a single location rather than repeating it in three places.
