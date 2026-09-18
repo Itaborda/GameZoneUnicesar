@@ -23,6 +23,8 @@ public abstract class Promotion {
      * @param endDate   the date the promotion stops being valid
      */
     public Promotion(String id, String name, LocalDate startDate, LocalDate endDate) {
+        validateDateRange(startDate, endDate);
+
         this.id = id;
         this.name = name;
         this.startDate = startDate;
@@ -78,8 +80,10 @@ public abstract class Promotion {
      * Sets the date the promotion becomes valid.
      *
      * @param startDate the new start date for the promotion
+     * @throws IllegalArgumentException if startDate is after the current end date
      */
     public void setStartDate(LocalDate startDate) {
+        validateDateRange(startDate, this.endDate);
         this.startDate = startDate;
     }
 
@@ -96,9 +100,24 @@ public abstract class Promotion {
      * Sets the date the promotion stops being valid.
      *
      * @param endDate the new end date for the promotion
+     * @throws IllegalArgumentException if endDate is before the current start date
      */
     public void setEndDate(LocalDate endDate) {
+        validateDateRange(this.startDate, endDate);
         this.endDate = endDate;
+    }
+
+    /**
+     * Ensures that a promotion's start date is not after its end date.
+     *
+     * @param startDate the start date to validate
+     * @param endDate   the end date to validate
+     * @throws IllegalArgumentException if startDate is after endDate
+     */
+    private void validateDateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("Start date cannot be after end date");
+        }
     }
 
     /**
