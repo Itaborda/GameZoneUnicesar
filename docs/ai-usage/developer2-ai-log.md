@@ -60,3 +60,20 @@ ChatGPT
 ## Entry 6 - Service (PersonService)
 
 - Asked Claude for help with JavaDoc documentation for the PersonService class.
+
+## Entry 7 - persistence and Service(ReturRepository, ReturnService) - requeriment 3
+- Asked Claude for git/commit conventions and Pull Request wording.
+- Asked Claude to explain constructor design choices.
+- Claude wrote the JavaDoc comments for the new classes and methods.
+
+## Entry 8 - persistence and service(AccessoryRepository, AccessoryService) - requeriment 1
+-Asked Claude for git/commit conventions and Pull Request wording.
+- Asked Claude to explain constructor design choices.
+- Claude wrote the JavaDoc comments for the new classes and methods.
+
+## Entry 9 - persistence and service (PromotionRepository, PromotionService) - requeriment 2
+-Asked Claude for git/commit conventions and Pull Request wording.
+- Asked Claude to explain constructor design choices.
+- Claude wrote the JavaDoc comments for the new classes and methods.
+- Claude provided guidance on CSV file storage design (header row,
+  discriminator column, `saveAll`/`loadAll` structure).
