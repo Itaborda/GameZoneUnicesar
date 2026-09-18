@@ -2,17 +2,11 @@ package com.gamezone;
 
 import com.gamezone.model.Person;
 import com.gamezone.model.Return;
-import com.gamezone.persistence.PersonRepository;
-import com.gamezone.persistence.ProductRepository;
-import com.gamezone.persistence.ReturnRepository;
-import com.gamezone.persistence.AccessoryRepository;
-import com.gamezone.persistence.SaleRepository;
-import com.gamezone.service.PersonService;
-import com.gamezone.service.ProductService;
-import com.gamezone.service.ReturnService;
-import com.gamezone.service.SaleService;
-import com.gamezone.service.AccessoryService;
+import com.gamezone.persistence.*;
+import com.gamezone.service.*;
 import com.gamezone.ui.ConsoleMenu;
+import com.gamezone.persistence.PromotionRepository;
+import com.gamezone.service.PromotionService;
 
 import java.util.List;
 
@@ -33,6 +27,12 @@ public class Main {
                 SaleRepository saleRepository =
                         new SaleRepository();
 
+                PromotionRepository promotionRepository =
+                        new PromotionRepository("data/promotions.csv");
+
+                PromotionService promotionService =
+                        new PromotionService(promotionRepository);
+
                 // Services
                 ProductService productService =
                         new ProductService();
@@ -50,7 +50,8 @@ public class Main {
                         new SaleService(
                                 saleRepository,
                                 productService,
-                                accessoryService
+                                accessoryService,
+                                promotionService
                         );
 
                 ReturnRepository returnRepository =
@@ -74,7 +75,8 @@ public class Main {
                                 personService,
                                 saleService,
                                 returnService,
-                                accessoryService
+                                accessoryService,
+                                promotionService
                         );
 
                 // Start application
