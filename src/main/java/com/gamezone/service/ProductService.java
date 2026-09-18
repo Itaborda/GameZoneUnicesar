@@ -13,23 +13,12 @@ public class ProductService {
     /**
      * Repository used for persisting and retrieving product data.
      */
-    private ProductRepository productRepository;
+    ProductRepository repository = new ProductRepository("data/product.csv");
 
     /**
      * In-memory cache of the list of products.
      */
     private List<Product> products;
-
-    /**
-     * Constructs a new {@code ProductService} instance and initializes the
-     * in-memory product list with all records currently stored in the repository.
-     *
-     * @param productRepository The repository instance to be used for data operations.
-     */
-    public ProductService(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-        this.products = productRepository.findAll();
-    }
 
     /**
      * Registers a new product by appending it to the in-memory list
@@ -39,7 +28,7 @@ public class ProductService {
      */
     public void registerProduct(Product product) {
         products.add(product);
-        productRepository.saveAll(products);
+        repository.saveAll(products);
     }
 
     /**
@@ -94,6 +83,32 @@ public class ProductService {
 
         product.setStockQuantity(product.getStockQuantity() - quantity);
 
-        productRepository.saveAll(products);
+        repository.saveAll(products);
+    }
+
+    /**
+     * Restores a specified quantity of stock to a product and persists
+     * the updated product list.
+     *
+     * @param productId The unique identifier of the product.
+     * @param quantity The number of units to restore.
+     * @throws IllegalArgumentException If the product does not exist
+     *                                  or the quantity is not positive.
+     */
+    public void restoreStock(String productId, int quantity) {
+        Product product = findById(productId);
+
+        if (product == null) {
+            throw new IllegalArgumentException("Product not found");
+        }
+
+        if (quantity <= 0) {
+            throw new IllegalArgumentException(
+                    "Quantity to restore must be greater than zero");
+        }
+
+        product.setStockQuantity(product.getStockQuantity() + quantity);
+
+        repository.saveAll(products);
     }
 }

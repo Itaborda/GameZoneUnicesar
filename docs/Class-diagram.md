@@ -161,4 +161,12 @@ classDiagram
     Sale --> Customer
     Sale --> Seller
     Sale o-- Product
+    
+    Person
+    ├── Customer
+    └── Seller
+
+    Product
+    ├── VideoGame
+    └── Console
 ```

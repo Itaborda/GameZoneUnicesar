@@ -4,6 +4,7 @@ import com.gamezone.model.Customer;
 import com.gamezone.model.Person;
 import com.gamezone.model.Seller;
 import com.gamezone.persistence.PersonRepository;
+import com.gamezone.persistence.ProductRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
  * memory to avoid reading the file on every operation.
  */
 public class PersonService {
-    private PersonRepository personRepository;
+    PersonRepository personRepository = new PersonRepository("data/product.csv");
     private List<Person> person;
     /**
      * Creates a new person service backed by the given repository
