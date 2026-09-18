@@ -1,7 +1,6 @@
 package com.gamezone.service;
 
 import com.gamezone.model.*;
-import com.gamezone.persistence.PromotionRepository;
 import com.gamezone.persistence.WarrantyRepository;
 
 import java.time.LocalDate;
@@ -15,7 +14,7 @@ import java.util.UUID;
  * operations, keeping the current list of warranties in memory to
  * avoid reading the file on every operation.
  */
-public class WarrentyService {
+public class WarrantyService {
     private WarrantyRepository warrantyRepository;
     private List<Warranty> warranties;
     /**
@@ -24,7 +23,7 @@ public class WarrentyService {
      *
      * @param warrantyRepository the repository used to persist warranties
      */
-    public WarrentyService(WarrantyRepository warrantyRepository) {
+    public WarrantyService(WarrantyRepository warrantyRepository) {
         this.warrantyRepository = warrantyRepository;
         this.warranties = warrantyRepository.loadAll();
     }
