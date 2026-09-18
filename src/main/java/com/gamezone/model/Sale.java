@@ -1,18 +1,22 @@
 package com.gamezone.model;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-
-    /**
-        * Represents a sale made in the GameZone store.
+/**
+ * Represents a sale made in the GameZone store.
  */
-
 public class Sale {
-
     private String saleId;
     private String date;
     private Customer customer;
     private Seller seller;
     private List<Product> products;
+    private String appliedPromotionName;
+    private double discountAmount;
+    private double warrantyAdditionalCost;
 
     /**
      * Creates a new sale with the given information.
@@ -23,117 +27,165 @@ public class Sale {
      * @param seller    the seller who made the sale
      * @param products  the products included in the sale
      */
-
     public Sale(String saleId, String date, Customer customer, Seller seller, List<Product> products) {
         this.saleId = saleId;
         this.date = date;
         this.customer = customer;
         this.seller = seller;
         this.products = products;
+        this.warrantyAdditionalCost = 0.0;
     }
 
-        /**
-         * Returns the sale's unique identifier.
-         *
-         * @return the sale's id
-         */
+    /**
+     * Returns the sale's unique identifier.
+     *
+     * @return the sale's id
+     */
     public String getSaleId() {
         return saleId;
     }
 
-        /**
-         * Sets the sale's unique identifier.
-         *
-         * @param saleId the new sale id
-         */
-
+    /**
+     * Sets the sale's unique identifier.
+     *
+     * @param saleId the new sale id
+     */
     public void setSaleId(String saleId) {
         this.saleId = saleId;
     }
 
-        /**
-         * Returns the date of the sale.
-         *
-         * @return the sale's date
-         */
+    /**
+     * Returns the date of the sale.
+     *
+     * @return the sale's date
+     */
     public String getDate() {
         return date;
     }
 
-        /**
-         * Sets the date of the sale.
-         *
-         * @param date the new sale date
-         */
-
+    /**
+     * Sets the date of the sale.
+     *
+     * @param date the new sale date
+     */
     public void setDate(String date) {
         this.date = date;
     }
-        /**
-         * Returns the customer associated with the sale.
-         *
-         * @return the sale's customer
-         */
 
+    /**
+     * Returns the customer associated with the sale.
+     *
+     * @return the sale's customer
+     */
     public Customer getCustomer() {
         return customer;
     }
 
-        /**
-         * Sets the customer associated with the sale.
-         *
-         * @param customer the new customer
-         */
+    /**
+     * Sets the customer associated with the sale.
+     *
+     * @param customer the new customer
+     */
     public void setCustomer(Customer customer) {
         this.customer = customer;
     }
 
-        /**
-         * Returns the seller associated with the sale.
-         *
-         * @return the sale's seller
-         */
-
-
+    /**
+     * Returns the seller associated with the sale.
+     *
+     * @return the sale's seller
+     */
     public Seller getSeller() {
         return seller;
     }
-        /**
-         * Sets the seller associated with the sale.
-         *
-         * @param seller the new seller
-         */
 
+    /**
+     * Sets the seller associated with the sale.
+     *
+     * @param seller the new seller
+     */
     public void setSeller(Seller seller) {
         this.seller = seller;
     }
-        /**
-         * Returns the products included in the sale.
-         *
-         * @return the list of products
-         */
 
+    /**
+     * Returns the products included in the sale.
+     *
+     * @return the list of products
+     */
     public List<Product> getProducts() {
         return products;
     }
 
-        /**
-         * Sets the products included in the sale.
-         *
-         * @param products the new list of products
-         */
+    /**
+     * Sets the products included in the sale.
+     *
+     * @param products the new list of products
+     */
     public void setProducts(List<Product> products) {
         this.products = products;
     }
 
-
+    /**
+     * Returns the name of the promotion applied to the sale.
+     *
+     * @return the applied promotion name
+     */
+    public String getAppliedPromotionName() {
+        return appliedPromotionName;
+    }
 
     /**
-     * Calculates the total price of all products in the sale.
+     * Sets the name of the promotion applied to the sale.
      *
-     * @return the total price of the sale
+     * @param appliedPromotionName the promotion name
      */
+    public void setAppliedPromotionName(String appliedPromotionName) {
+        this.appliedPromotionName = appliedPromotionName;
+    }
 
+    /**
+     * Returns the discount amount applied to the sale.
+     *
+     * @return the discount amount
+     */
+    public double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    /**
+     * Sets the discount amount applied to the sale.
+     *
+     * @param discountAmount the discount amount
+     */
+    public void setDiscountAmount(double discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    /**
+     * Returns the additional cost generated by extended warranties.
+     *
+     * @return the additional warranty cost
+     */
+    public double getWarrantyAdditionalCost() {
+        return warrantyAdditionalCost;
+    }
+
+    /**
+     * Sets the additional cost generated by extended warranties.
+     *
+     * @param warrantyAdditionalCost the additional warranty cost
+     */
+    public void setWarrantyAdditionalCost(double warrantyAdditionalCost) {
+        this.warrantyAdditionalCost = warrantyAdditionalCost;
+    }
+
+    /**
+     * Calculates the subtotal of all products and additional warranty costs
+     * included in the sale.
+     *
+     * @return the subtotal of the sale
+     */
     public double calculateTotal() {
         double total = 0;
 
@@ -141,6 +193,81 @@ public class Sale {
             total += product.getPrice();
         }
 
+        total += warrantyAdditionalCost;
+
         return total;
+    }
+
+    /**
+     * Generates a receipt containing the sale subtotal,
+     * warranty cost, applied promotion, discount amount,
+     * and final total.
+     *
+     * @return the formatted sale receipt
+     */
+    public String generateReceipt() {
+        double subtotal = calculateTotal();
+        double finalTotal = subtotal - discountAmount;
+
+        StringBuilder receipt = new StringBuilder();
+
+        receipt.append("\n========== SALE RECEIPT ==========\n");
+        receipt.append("Sale ID: ").append(saleId).append("\n");
+        receipt.append("Date: ").append(date).append("\n");
+        receipt.append("----------------------------------\n");
+        receipt.append(String.format("Subtotal: $%.2f%n", subtotal));
+
+        if (warrantyAdditionalCost > 0) {
+            receipt.append(String.format(
+                    "Extended Warranty: +$%.2f%n",
+                    warrantyAdditionalCost
+            ));
+        }
+
+        if (appliedPromotionName != null && !appliedPromotionName.isBlank()) {
+            receipt.append("Promotion: ")
+                    .append(appliedPromotionName)
+                    .append("\n");
+            receipt.append(String.format(
+                    "Discount: -$%.2f%n",
+                    discountAmount
+            ));
+        } else {
+            receipt.append("Promotion: None\n");
+            receipt.append(String.format(
+                    "Discount: $%.2f%n",
+                    0.0
+            ));
+        }
+
+        receipt.append("----------------------------------\n");
+        receipt.append(String.format("Final Total: $%.2f%n", finalTotal));
+        receipt.append("==================================\n");
+
+        return receipt.toString();
+    }
+
+    /**
+     * Determines whether this sale is still eligible for a return,
+     * that is, whether the current date falls within the 30 calendar
+     * days following the sale's date.
+     *
+     * @return true if the sale is within its 30-day return window, false otherwise
+     */
+    public boolean canBeReturned() {
+        if (date == null || date.isBlank()) {
+            return false;
+        }
+
+        try {
+            LocalDate saleDate = LocalDate.parse(date);
+            LocalDate today = LocalDate.now();
+
+            long daysSinceSale = ChronoUnit.DAYS.between(saleDate, today);
+
+            return daysSinceSale >= 0 && daysSinceSale <= 30;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
     }
 }

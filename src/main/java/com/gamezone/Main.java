@@ -1,36 +1,94 @@
 package com.gamezone;
 
-import com.gamezone.persistence.PersonRepository;
-import com.gamezone.persistence.ProductRepository;
-import com.gamezone.persistence.SaleRepository;
-import com.gamezone.service.PersonService;
-import com.gamezone.service.ProductService;
-import com.gamezone.service.SaleService;
-import com.gamezone.ui.MainMenu;
+import com.gamezone.model.Person;
+import com.gamezone.model.Return;
+import com.gamezone.persistence.*;
+import com.gamezone.service.*;
+import com.gamezone.ui.ConsoleMenu;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
 
-    public static void main(String[] args) {
-        // 1. Instanciación de los Repositorios
-        // 1. Instanciación de los Repositorios con la ruta del archivo
-        ProductRepository productRepository = new ProductRepository("products.dat");
-        PersonRepository personRepository = new PersonRepository("persons.dat");
-        SaleRepository saleRepository = new SaleRepository();
-        // 2. Instanciación de Servicios
-        ProductService productService = new ProductService(productRepository);
+        public static void main(String[] args) {
 
-        // PersonService requiere el repositorio y una lista inicial (List<Person>)
-        PersonService personService = new PersonService(personRepository, new ArrayList<>());
+                // Repositories
+                ProductRepository productRepository =
+                        new ProductRepository("Data/Products.csv");
 
-        // SaleService en tu código solo pide (SaleRepository, ProductService)
-        SaleService saleService = new SaleService(saleRepository, productService);
+                PersonRepository personRepository =
+                        new PersonRepository("Data/Persons.csv");
 
-        // 3. Inicialización del Menú
-        MainMenu menu = new MainMenu();
+                AccessoryRepository accessoryRepository =
+                        new AccessoryRepository("Data/Accessories.csv");
 
-        // En tu MainMenu el método para iniciar se llama showMenu()
-        menu.showMenu();
-    }
+                SaleRepository saleRepository =
+                        new SaleRepository();
+
+                PromotionRepository promotionRepository =
+                        new PromotionRepository("data/promotions.csv");
+
+                WarrantyRepository warrantyRepository =
+                        new WarrantyRepository(
+                                productRepository,
+                                saleRepository
+                        );
+
+                PromotionService promotionService =
+                        new PromotionService(promotionRepository);
+
+                // Services
+                ProductService productService =
+                        new ProductService();
+
+                AccessoryService accessoryService =
+                        new AccessoryService(accessoryRepository);
+
+                List<Person> people =
+                        personRepository.findAll();
+
+                PersonService personService =
+                        new PersonService(personRepository, people);
+
+                WarrantyService warrantyService =
+                        new WarrantyService(warrantyRepository);
+
+                SaleService saleService =
+                        new SaleService(
+                                saleRepository,
+                                productService,
+                                accessoryService,
+                                promotionService,
+                                warrantyService
+                        );
+
+                ReturnRepository returnRepository =
+                        new ReturnRepository(saleService, productService);
+
+                List<Return> returns =
+                        returnRepository.loadAll();
+
+                ReturnService returnService =
+                        new ReturnService(
+                                productService,
+                                returnRepository,
+                                saleService,
+                                returns
+                        );
+
+                // Main Menu
+                ConsoleMenu consoleMenu =
+                        new ConsoleMenu(
+                                productService,
+                                personService,
+                                saleService,
+                                returnService,
+                                accessoryService,
+                                promotionService,
+                                warrantyService
+                        );
+
+                // Start application
+                consoleMenu.showMenu();
+        }
 }
