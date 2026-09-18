@@ -2,6 +2,7 @@ package com.gamezone.service;
 
 import com.gamezone.model.Accessory;
 import com.gamezone.model.Product;
+import com.gamezone.model.Promotion;
 import com.gamezone.model.Sale;
 import com.gamezone.persistence.SaleRepository;
 
@@ -15,6 +16,7 @@ public class SaleService {
     private SaleRepository salePersistence;
     private ProductService productService;
     private AccessoryService accessoryService;
+    private PromotionService promotionService;
 
     /**
      * Creates a sale service with its required dependencies.
@@ -22,13 +24,16 @@ public class SaleService {
      * @param salePersistence repository used to store sales
      * @param productService service used to manage product stock
      * @param accessoryService service used to manage accessory stock
+     * @param promotionService service used to manage promotions
      */
     public SaleService(SaleRepository salePersistence,
                        ProductService productService,
-                       AccessoryService accessoryService) {
+                       AccessoryService accessoryService,
+                       PromotionService promotionService) {
         this.salePersistence = salePersistence;
         this.productService = productService;
         this.accessoryService = accessoryService;
+        this.promotionService = promotionService;
     }
 
     /**
@@ -97,6 +102,18 @@ public class SaleService {
             } else {
                 productService.updateStock(product.getId(), 1);
             }
+        }
+
+        // Apply the best active promotion to the sale
+        Promotion bestPromotion =
+                promotionService.findBestPromotionFor(sale);
+
+        if (bestPromotion != null) {
+            double discount =
+                    bestPromotion.calculateDiscount(sale);
+
+            sale.setAppliedPromotionName(bestPromotion.getName());
+            sale.setDiscountAmount(discount);
         }
 
         // Save the sale after successfully updating the stock

@@ -103,4 +103,20 @@ public class PromotionService {
         return best;
     }
 
+    /**
+     * Finds a promotion by its unique identifier.
+     *
+     * @param id the promotion identifier
+     * @return the matching promotion, or null if it does not exist
+     */
+    public Promotion findById(String id) {
+        for (Promotion promotion : promotions) {
+            if (promotion.getId().equals(id)) {
+                return promotion;
+            }
+        }
+
+        return null;
+    }
+
 }

@@ -9,7 +9,6 @@ import java.util.List;
  * Represents a sale made in the GameZone store.
  */
 public class Sale {
-
     private String saleId;
     private String date;
     private Customer customer;
@@ -162,9 +161,9 @@ public class Sale {
     }
 
     /**
-     * Calculates the total price of all products in the sale.
+     * Calculates the subtotal of all products in the sale.
      *
-     * @return the total price of the sale
+     * @return the subtotal of the sale
      */
     public double calculateTotal() {
         double total = 0;
@@ -174,6 +173,47 @@ public class Sale {
         }
 
         return total;
+    }
+
+    /**
+     * Generates a receipt containing the sale subtotal,
+     * applied promotion, discount amount, and final total.
+     *
+     * @return the formatted sale receipt
+     */
+    public String generateReceipt() {
+        double subtotal = calculateTotal();
+        double finalTotal = subtotal - discountAmount;
+
+        StringBuilder receipt = new StringBuilder();
+
+        receipt.append("\n========== SALE RECEIPT ==========\n");
+        receipt.append("Sale ID: ").append(saleId).append("\n");
+        receipt.append("Date: ").append(date).append("\n");
+        receipt.append("----------------------------------\n");
+        receipt.append(String.format("Subtotal: $%.2f%n", subtotal));
+
+        if (appliedPromotionName != null && !appliedPromotionName.isBlank()) {
+            receipt.append("Promotion: ")
+                    .append(appliedPromotionName)
+                    .append("\n");
+            receipt.append(String.format(
+                    "Discount: -$%.2f%n",
+                    discountAmount
+            ));
+        } else {
+            receipt.append("Promotion: None\n");
+            receipt.append(String.format(
+                    "Discount: $%.2f%n",
+                    0.0
+            ));
+        }
+
+        receipt.append("----------------------------------\n");
+        receipt.append(String.format("Final Total: $%.2f%n", finalTotal));
+        receipt.append("==================================\n");
+
+        return receipt.toString();
     }
 
     /**
