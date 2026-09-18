@@ -16,9 +16,14 @@ public class BasicWarranty extends Warranty {
      * @param product   the product covered by this warranty
      * @param sale      the sale that generated this warranty
      * @param startDate the date the warranty becomes valid
+     * @throws IllegalArgumentException if product is not a Console
      */
     public BasicWarranty(String id, Product product, Sale sale, LocalDate startDate) {
         super(id, product, sale, startDate);
+
+        if (!(product instanceof Console)) {
+            throw new IllegalArgumentException("Basic warranty can only be assigned to a console");
+        }
     }
 
     /**
