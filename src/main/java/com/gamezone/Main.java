@@ -5,11 +5,13 @@ import com.gamezone.model.Return;
 import com.gamezone.persistence.PersonRepository;
 import com.gamezone.persistence.ProductRepository;
 import com.gamezone.persistence.ReturnRepository;
+import com.gamezone.persistence.AccessoryRepository;
 import com.gamezone.persistence.SaleRepository;
 import com.gamezone.service.PersonService;
 import com.gamezone.service.ProductService;
 import com.gamezone.service.ReturnService;
 import com.gamezone.service.SaleService;
+import com.gamezone.service.AccessoryService;
 import com.gamezone.ui.ConsoleMenu;
 
 import java.util.List;
@@ -25,12 +27,18 @@ public class Main {
                 PersonRepository personRepository =
                         new PersonRepository("Data/Persons.csv");
 
+                AccessoryRepository accessoryRepository =
+                        new AccessoryRepository("Data/Accessories.csv");
+
                 SaleRepository saleRepository =
                         new SaleRepository();
 
                 // Services
                 ProductService productService =
                         new ProductService();
+
+                AccessoryService accessoryService =
+                        new AccessoryService(accessoryRepository);
 
                 List<Person> people =
                         personRepository.findAll();
@@ -39,7 +47,11 @@ public class Main {
                         new PersonService(personRepository, people);
 
                 SaleService saleService =
-                        new SaleService(saleRepository, productService);
+                        new SaleService(
+                                saleRepository,
+                                productService,
+                                accessoryService
+                        );
 
                 ReturnRepository returnRepository =
                         new ReturnRepository(saleService, productService);
@@ -61,7 +73,8 @@ public class Main {
                                 productService,
                                 personService,
                                 saleService,
-                                returnService
+                                returnService,
+                                accessoryService
                         );
 
                 // Start application

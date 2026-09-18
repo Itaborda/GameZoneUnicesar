@@ -116,11 +116,25 @@ public class AccessoryService {
      * @param quantity    the new stock quantity
      */
     public void updateStock(String accessoryId, int quantity) {
-        Accessory a = findById(accessoryId);
-        if (a != null) {
-            a.setStockQuantity(quantity);
-            accessoryRepository.saveAll(accessories);
+        Accessory accessory = findById(accessoryId);
+
+        if (accessory == null) {
+            throw new IllegalArgumentException("Accessory not found");
         }
+
+        if (quantity < 0) {
+            throw new IllegalArgumentException("Quantity cannot be negative");
+        }
+
+        if (accessory.getStockQuantity() < quantity) {
+            throw new IllegalArgumentException("Insufficient stock");
+        }
+
+        accessory.setStockQuantity(
+                accessory.getStockQuantity() - quantity
+        );
+
+        accessoryRepository.saveAll(accessories);
     }
 }
 

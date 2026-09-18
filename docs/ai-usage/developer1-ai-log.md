@@ -42,3 +42,11 @@
 **Question or query:** Review of the Return class and the canBeReturned() method in Sale, which were left incomplete in a previous session, to verify which adjustments were still needed according to the requirements.
 **Summary of response:** It was identified that Return had an unused import (ArrayList), disorganized imports, and missing JavaDoc documentation. In canBeReturned(), it was detected that the method did not validate whether the date was null or blank (which could throw a DateTimeParseException), and that the 30-day range calculation needed to be adjusted using ChronoUnit.DAYS.between().
 **Decision made:** I cleaned up the imports, added the corresponding JavaDoc to both parts, and restructured the logic of canBeReturned() by adding null/blank validation and exception handling. I also decided to split the work into atomic commits (imports, JavaDoc, and logic separately) to keep the repository history organized.
+
+---
+
+## 2026-09-17 - Accessory hierarchy design for the accessory module
+**Tool:** Claude / Consultation support
+**Question or query:** Reviewing the best way to structure the `Accessory` class hierarchy (`Controller`, `Cable`, and `Memory` extending `Product`) to reuse existing attributes and properly model console compatibility according to Requirement 1.
+**Summary of response:** Reviewed the approach of making `Accessory` extend `Product` directly so it inherits base fields (`id`, `title`, `price`, `stockQuantity`). Analyzed modeling compatibility using a `List<String>` of console IDs in `Accessory` to keep it decoupled from the full `Console` object, which simplifies filtering in `AccessoryService`. Also looked at having `Accessory` define a base `getDescription()` that subclasses override using `super.getDescription()` to append specific details without repeating code.
+**Decision made:** Created `Accessory` as an abstract class with the compatibility list and helper methods (`addCompatibleConsole`, `removeCompatibleConsole`, `isCompatibleWith`). Implemented the concrete subclasses `Controller` (with `connectionType`), `Cable` (with `lengthInMeters`, `connectorType`), and `Memory` (with `capacityInGigabytes`, `memoryType`). Documented these design choices to answer the team's analysis questions in `docs/accessory-analysis.md`.
