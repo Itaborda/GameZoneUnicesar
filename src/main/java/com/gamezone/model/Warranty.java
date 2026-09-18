@@ -25,8 +25,25 @@ public abstract class Warranty {
      * @param product   the product covered by this warranty
      * @param sale      the sale that generated this warranty
      * @param startDate the date the warranty becomes valid
+     * @throws IllegalArgumentException if id is null or blank, or if product, sale, or startDate is null
      */
     public Warranty(String id, Product product, Sale sale, LocalDate startDate) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("Warranty id cannot be null or blank");
+        }
+
+        if (product == null) {
+            throw new IllegalArgumentException("Warranty product cannot be null");
+        }
+
+        if (sale == null) {
+            throw new IllegalArgumentException("Warranty sale cannot be null");
+        }
+
+        if (startDate == null) {
+            throw new IllegalArgumentException("Warranty start date cannot be null");
+        }
+
         this.id = id;
         this.product = product;
         this.sale = sale;
