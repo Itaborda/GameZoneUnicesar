@@ -9,13 +9,28 @@ import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Handles file-based persistence for {@link Promotion} objects.
+ * This class is responsible for saving and loading percentage,
+ * category, and bulk purchase promotions to and from a
+ * CSV-formatted text file.
+ */
 public class PromotionRepository {
     private String filePath;
-
+    /**
+     * Creates a new PromotionRepository using the default file path.
+     */
     public PromotionRepository(String filePath) {
         this.filePath = "data/promotion.csv";
     }
+    /**
+     * Saves the given list of promotions to the file, overwriting its
+     * previous content. Each line represents one promotion, with the
+     * columns depending on whether it is a percentage, category, or
+     * bulk purchase discount.
+     *
+     * @param promotions the list of promotions to save
+     */
     public void saveAll(List<Promotion> promotions) {
         File file = new File(filePath);
         File parent = file.getParentFile();
@@ -62,6 +77,15 @@ public class PromotionRepository {
             e.printStackTrace();
         }
     }
+    /**
+     * Loads all promotions stored in the file and reconstructs them as
+     * {@link PercentageDiscount}, {@link CategoryDiscount}, or
+     * {@link BulkPurchaseDiscount} objects based on the type column
+     * of each line.
+     *
+     * @return the list of promotions loaded from the file, or an empty
+     * list if the file does not exist
+     */
     public List<Promotion> loadAll() {
         List<Promotion> promotions = new ArrayList<>();
         File file = new File(filePath);
