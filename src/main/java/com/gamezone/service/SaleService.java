@@ -1,5 +1,6 @@
 package com.gamezone.service;
 
+import com.gamezone.model.Accessory;
 import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
 import com.gamezone.persistence.SaleRepository;
@@ -11,22 +12,24 @@ import java.util.List;
  */
 public class SaleService {
 
-    private  SaleRepository salePersistence;
+    private SaleRepository salePersistence;
     private ProductService productService;
-
+    private AccessoryService accessoryService;
 
     /**
      * Creates a sale service with its required dependencies.
      *
      * @param salePersistence repository used to store sales
      * @param productService service used to manage product stock
+     * @param accessoryService service used to manage accessory stock
      */
     public SaleService(SaleRepository salePersistence,
-                       ProductService productService) {
+                       ProductService productService,
+                       AccessoryService accessoryService) {
         this.salePersistence = salePersistence;
         this.productService = productService;
+        this.accessoryService = accessoryService;
     }
-
 
     /**
      * Registers a sale if it contains at least one product and
@@ -38,32 +41,65 @@ public class SaleService {
      *                                  or there is insufficient stock
      */
     public void registerSale(Sale sale) {
+
         if (sale.getProducts() == null || sale.getProducts().isEmpty()) {
             throw new IllegalArgumentException(
                     "A sale must contain at least one product."
             );
         }
 
+        // Validate stock for all products and accessories
         for (Product product : sale.getProducts()) {
-            Product storedProduct = productService.findById(product.getId());
 
-            if (storedProduct == null) {
-                throw new IllegalArgumentException(
-                        "Product not found: " + product.getId()
-                );
-            }
+            if (product instanceof Accessory) {
 
-            if (storedProduct.getStockQuantity() < 1) {
-                throw new IllegalArgumentException(
-                        "Insufficient stock for product: " + product.getId()
-                );
+                Accessory accessory =
+                        accessoryService.findById(product.getId());
+
+                if (accessory == null) {
+                    throw new IllegalArgumentException(
+                            "Accessory not found: " + product.getId()
+                    );
+                }
+
+                if (accessory.getStockQuantity() < 1) {
+                    throw new IllegalArgumentException(
+                            "Insufficient stock for accessory: "
+                                    + product.getId()
+                    );
+                }
+
+            } else {
+
+                Product storedProduct =
+                        productService.findById(product.getId());
+
+                if (storedProduct == null) {
+                    throw new IllegalArgumentException(
+                            "Product not found: " + product.getId()
+                    );
+                }
+
+                if (storedProduct.getStockQuantity() < 1) {
+                    throw new IllegalArgumentException(
+                            "Insufficient stock for product: "
+                                    + product.getId()
+                    );
+                }
             }
         }
 
+        // Update stock according to the product type
         for (Product product : sale.getProducts()) {
-            productService.updateStock(product.getId(), 1);
+
+            if (product instanceof Accessory) {
+                accessoryService.updateStock(product.getId(), 1);
+            } else {
+                productService.updateStock(product.getId(), 1);
+            }
         }
 
+        // Save the sale after successfully updating the stock
         salePersistence.save(sale);
     }
 
