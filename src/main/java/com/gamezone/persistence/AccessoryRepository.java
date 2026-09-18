@@ -9,17 +9,36 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+/**
+ * Handles file-based persistence for {@link Accessory} objects.
+ * This class is responsible for saving and loading controllers,
+ * cables, and memories to and from a CSV-formatted text file.
+ */
 public class AccessoryRepository {
     private String filePath;
-
+    /**
+     * Creates a new repository that reads from and writes to the
+     * given file path.
+     *
+     * @param filePath the path of the file used to store accessory data
+     */
     public AccessoryRepository(String filePath) {
         this.filePath = filePath;
     }
-
+    /**
+     * Creates a new AccessoryRepository using the default file path.
+     */
     public AccessoryRepository() {
         this.filePath = "data/accessories.csv";
     }
+    /**
+     * Saves the given list of accessories to the file, overwriting its
+     * previous content. Each line represents one accessory, with the
+     * columns depending on whether it is a controller, a cable, or a
+     * memory.
+     *
+     * @param accessories the list of accessories to save
+     */
     public void saveAll(List<Accessory> accessories) {
         File file = new File(filePath);
         File parent = file.getParentFile();
@@ -71,6 +90,14 @@ public class AccessoryRepository {
             e.printStackTrace();
         }
     }
+    /**
+     * Loads all accessories stored in the file and reconstructs them as
+     * {@link Controller}, {@link Cable}, or {@link Memory} objects based
+     * on the type column of each line.
+     *
+     * @return the list of accessories loaded from the file, or an empty
+     * list if the file does not exist
+     */
     public List<Accessory> loadAll() {
         List<Accessory> accessories = new ArrayList<>();
         File file = new File(filePath);
