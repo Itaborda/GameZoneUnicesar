@@ -128,3 +128,19 @@ ChatGPT
 **Use of AI:** Explanation of using Git stash and pulling changes from the develop branch.
 
 **Decision taken:** I temporarily saved my local changes, updated my feature branch with develop, and continued working with my changes preserved.
+
+---
+
+## Entry 11 - Unified Sale Registration
+
+**Topic:** Integration of the sale registration process.
+
+**Question:** I asked how to organize the sale registration process so that it could work correctly with products, accessories, promotions, and warranties.
+
+**Use of AI:** I used ChatGPT to understand how the different services should work together during a sale and in what order the validations, promotion, warranty, stock update, and persistence should be handled.
+
+**Decision taken:** Based on the explanation, I decided to organize the registration process in `SaleService`. The process first checks that the sale has items and that they have available stock. Then, it identifies whether each item is a product or an accessory, applies the best available promotion, assigns the corresponding warranties to consoles, updates the inventory, and finally saves the sale.
+
+**Related branch:** `refactor/unified-sale-registration`
+
+**Related commit:** `refactor: unify sale registration flow`
