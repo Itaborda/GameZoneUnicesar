@@ -2,11 +2,11 @@ package com.gamezone.service;
 
 import com.gamezone.model.Accessory;
 import com.gamezone.model.Console;
+import com.gamezone.model.ExtendedWarranty;
 import com.gamezone.model.Product;
 import com.gamezone.model.Promotion;
 import com.gamezone.model.Sale;
 import com.gamezone.persistence.SaleRepository;
-import com.gamezone.model.ExtendedWarranty;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -44,27 +44,28 @@ public class SaleService {
     }
 
     /**
-     * Registers a sale if it contains at least one product and
-     * all products have enough stock available.
+     * Registers a sale by validating its items, applying the best promotion,
+     * assigning warranties, updating inventory, and persisting the sale.
      *
      * @param sale the sale to register
      * @param productIdsWithExtendedWarranty product identifiers selected
      *                                        for extended warranty
-     * @throws IllegalArgumentException if the sale has no products,
-     *                                  a product does not exist,
+     * @throws IllegalArgumentException if the sale has no items,
+     *                                  an item does not exist,
      *                                  or there is insufficient stock
      */
     public void registerSale(
             Sale sale,
             List<String> productIdsWithExtendedWarranty) {
 
+        // Step 1: Validate that the sale contains at least one item.
         if (sale.getProducts() == null || sale.getProducts().isEmpty()) {
             throw new IllegalArgumentException(
-                    "A sale must contain at least one product."
+                    "A sale must contain at least one item."
             );
         }
 
-        // Validate stock for all products and accessories
+        // Step 2: Resolve every item and validate its available stock.
         for (Product product : sale.getProducts()) {
 
             if (product instanceof Accessory) {
@@ -105,29 +106,27 @@ public class SaleService {
             }
         }
 
-        // Update stock according to the product type
-        for (Product product : sale.getProducts()) {
+        // Step 3: The sale subtotal is calculated by Sale.calculateTotal().
 
-            if (product instanceof Accessory) {
-                accessoryService.updateStock(product.getId(), 1);
-            } else {
-                productService.updateStock(product.getId(), 1);
-            }
-        }
-
-        // Apply the best active promotion to the sale
+        // Step 4: Apply the best active promotion.
         Promotion bestPromotion =
                 promotionService.findBestPromotionFor(sale);
 
         if (bestPromotion != null) {
+
             double discount =
                     bestPromotion.calculateDiscount(sale);
 
             sale.setAppliedPromotionName(bestPromotion.getName());
             sale.setDiscountAmount(discount);
+
+        } else {
+
+            sale.setAppliedPromotionName(null);
+            sale.setDiscountAmount(0.0);
         }
 
-        // Assign warranties to consoles included in the sale
+        // Step 5: Assign basic and requested extended warranties.
         LocalDate saleDate = LocalDate.parse(sale.getDate());
 
         if (productIdsWithExtendedWarranty == null) {
@@ -138,14 +137,14 @@ public class SaleService {
 
             if (product instanceof Console) {
 
-                // Every console receives a basic warranty automatically
+                // Every console receives a basic warranty automatically.
                 warrantyService.assignBasicWarranty(
                         product,
                         sale,
                         saleDate
                 );
 
-                // Assign extended warranty when selected by the customer
+                // Assign extended warranty when selected by the customer.
                 if (productIdsWithExtendedWarranty.contains(product.getId())) {
 
                     ExtendedWarranty warranty =
@@ -163,8 +162,29 @@ public class SaleService {
             }
         }
 
-        // Save the sale after successfully updating the stock
-        // and assigning the corresponding warranties.
+        // Step 6: The final total is calculated by Sale.generateReceipt()
+        // using subtotal - discount + extended warranty cost.
+
+        // Step 7: Update inventory according to the item type.
+        for (Product product : sale.getProducts()) {
+
+            if (product instanceof Accessory) {
+
+                accessoryService.updateStock(
+                        product.getId(),
+                        1
+                );
+
+            } else {
+
+                productService.updateStock(
+                        product.getId(),
+                        1
+                );
+            }
+        }
+
+        // Step 8: Persist the sale after all previous steps succeed.
         salePersistence.save(sale);
     }
 
