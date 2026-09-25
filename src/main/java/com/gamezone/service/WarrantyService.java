@@ -124,4 +124,29 @@ public class WarrantyService {
     private String generateId() {
         return UUID.randomUUID().toString();
     }
+    public void persist(){
+        List<String[]> rows = new ArrayList<>();
+        for (Warranty w : warranties) {
+            String type;
+            if (w instanceof BasicWarranty) {
+                type = "BASIC";
+            } else if (w instanceof ExtendedWarranty) {
+                type = "EXTENDED";
+            } else {
+                continue;
+            }
+
+            String[] row = {
+                    type,
+                    w.getId(),
+                    w.getProduct().getId(),
+                    w.getSale().getSaleId(),
+                    w.getStartDate().toString(),
+                    w.getEndDate().toString()
+            };
+            rows.add(row);
+        }
+        warrantyRepository.saveAll(rows);
+
+    }
 }
