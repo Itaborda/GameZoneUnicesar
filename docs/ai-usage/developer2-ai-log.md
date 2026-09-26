@@ -77,3 +77,17 @@ ChatGPT
 - Claude wrote the JavaDoc comments for the new classes and methods.
 - Claude provided guidance on CSV file storage design (header row,
   discriminator column, `saveAll`/`loadAll` structure).
+
+## Entry 11 - Service and Persistence (ReturnService, AccessoryService, ReturnRepository) - Requirement 5, adjustment A4
+
+**Topic:** Restoring accessory stock on returns (accessories were not being restocked when returned).
+
+**Question:** I asked Claude how to modify ReturnService, AccessoryService and ReturnRepository so returned accessories would have their stock restored, given that Accessory extends Product.
+
+**Use of AI:**
+- Claude clarified that since Accessory extends Product, Sale and Return could already hold accessories inside their List<Product> without model changes.
+- Claude wrote the JavaDoc comments for the modified classes and methods.
+- Claude helped fix the constructor calls in Main after the signatures changed (parameter order and missing arguments).
+- Asked Claude for commit message wording and Pull Request wording (problem, cause, solution, verification) for the fix/ branch.
+
+**Decision taken:** I applied the instanceof-based solution to distinguish accessories from products when restoring stock, updated all four affected classes (AccessoryService, ReturnService, ReturnRepository, Main), and used the suggested commit and Pull Request wording for branch fix/return-accessory-stock.
