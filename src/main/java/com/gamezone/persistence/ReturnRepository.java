@@ -34,11 +34,15 @@ public class ReturnRepository {
      * @param accessoryService used to resolve returned accessories by id when loading,
      *                         for items not found as a product
      */
-    public ReturnRepository(AccessoryService accessoryService, SaleService saleService, ProductService productService) {
+    public ReturnRepository(
+            AccessoryService accessoryService,
+            SaleService saleService,
+            ProductService productService) {
+
         this.accessoryService = accessoryService;
         this.saleService = saleService;
         this.productService = productService;
-        this.filePath = filePath;
+        this.filePath = "Data/Returns.csv";
     }
 
 
