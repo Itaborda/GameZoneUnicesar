@@ -5,6 +5,7 @@ import com.gamezone.model.Product;
 import com.gamezone.model.Return;
 import com.gamezone.model.Sale;
 import com.gamezone.persistence.ReturnRepository;
+import com.gamezone.persistence.SaleRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.List;
  * financial balance that accounts for both sales and returns.
  */
 public class ReturnService {
+    private final SaleRepository saleRepository;
     private final ReturnRepository returnRepository;
     private final AccessoryService accessoryService;
     private final SaleService saleService;
@@ -32,8 +34,9 @@ public class ReturnService {
      * @param returns          the in-memory list of registered returns
      * @param accessoryService the service used to manage accessory stock
      */
-    public ReturnService(AccessoryService accessoryService, ReturnRepository returnRepository, SaleService saleService, ProductService productService, List<Return> returns) {
+    public ReturnService(AccessoryService accessoryService, SaleRepository saleRepository, ReturnRepository returnRepository, SaleService saleService, ProductService productService, List<Return> returns) {
         this.accessoryService = accessoryService;
+        this.saleRepository = saleRepository;
         this.returnRepository = returnRepository;
         this.saleService = saleService;
         this.productService = productService;
@@ -164,24 +167,42 @@ public class ReturnService {
      *         specified month and year
      */
     public double generateMonthlyBalance(int month, int year) {
-        double totalSales = 0;
-        double totalReturns = 0;
-
+        return calculateMonthlySales(month, year) - calculateMonthlyReturns(month, year);
+    }
+    /**
+     * Calculates the total sales amount for the given month and year,
+     * using each sale's final total (subtotal minus discount plus
+     * extended warranty cost).
+     *
+     * @param month the month to evaluate (1-12)
+     * @param year  the year to evaluate
+     * @return the sum of the final total of every sale registered in that month
+     */
+    public double calculateMonthlySales(int month, int year) {
+        double totalSales = 0.0;
         for (Sale s : saleService.findAll()) {
             LocalDate saleDate = LocalDate.parse(s.getDate());
             if (saleDate.getMonthValue() == month && saleDate.getYear() == year) {
                 totalSales += s.calculateTotal();
             }
         }
-
-
-
+        return totalSales;
+    }
+    /**
+     * Calculates the total refunded amount for the given month and year.
+     *
+     * @param month the month to evaluate (1-12)
+     * @param year  the year to evaluate
+     * @return the sum of the refund amount of every return registered in that month
+     */
+    public double calculateMonthlyReturns(int month, int year) {
+        double totalReturns = 0.0;
         for (Return r : returns) {
             if (r.getReturnDate().getMonthValue() == month && r.getReturnDate().getYear() == year) {
                 totalReturns += r.getRefundAmount();
             }
         }
-
-        return totalSales - totalReturns;
+        return totalReturns;
     }
+
 }
