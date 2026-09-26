@@ -20,9 +20,11 @@ public class PromotionRepository {
     /**
      * Creates a new PromotionRepository using the default file path.
      */
+
     public PromotionRepository(String filePath) {
-        this.filePath = "data/promotion.csv";
+        this.filePath = filePath;
     }
+
     /**
      * Saves the given list of promotions to the file, overwriting its
      * previous content. Each line represents one promotion, with the

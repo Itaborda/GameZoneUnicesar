@@ -3,6 +3,7 @@ package com.gamezone.persistence;
 import com.gamezone.model.Product;
 import com.gamezone.model.Return;
 import com.gamezone.model.Sale;
+import com.gamezone.service.AccessoryService;
 import com.gamezone.service.ProductService;
 import com.gamezone.service.SaleService;
 
@@ -21,20 +22,26 @@ import java.util.List;
  */
 public class ReturnRepository {
     private static final String PRODUCT_ID_SEPARATOR = ";";
-    private final String filePath;
+    private  String filePath;
+    private final AccessoryService accessoryService;
     private final SaleService saleService;
     private final ProductService productService;
     /**
      * Creates a new ReturnRepository using the default file path.
      *
-     * @param saleService    used to resolve the original sale by id when loading
-     * @param productService used to resolve returned products by id when loading
+     * @param saleService      used to resolve the original sale by id when loading
+     * @param productService   used to resolve returned products by id when loading
+     * @param accessoryService used to resolve returned accessories by id when loading,
+     *                         for items not found as a product
      */
-    public ReturnRepository(SaleService saleService, ProductService productService) {
-        this.filePath = "data/return.csv";
+    public ReturnRepository(AccessoryService accessoryService, SaleService saleService, ProductService productService) {
+        this.accessoryService = accessoryService;
         this.saleService = saleService;
         this.productService = productService;
+        this.filePath = "data/return.csv";
     }
+
+
     /**
      * Saves all returns to the configured file.
      *
@@ -81,8 +88,10 @@ public class ReturnRepository {
      * Retrieves all returns stored in the configured file.
      *
      * The method reads each line of the file, resolves the original
-     * sale and the returned products using the injected services,
-     * and reconstructs each Return object.
+     * sale using the injected SaleService, resolves each returned
+     * item first as a product using ProductService, and falls back
+     * to AccessoryService when no matching product is found, then
+     * reconstructs each Return object.
      *
      * @return a list containing all returns found in the file, or an
      *         empty list if the file does not exist
@@ -118,7 +127,11 @@ public List<Return> loadAll() {
             if (!data[3].isEmpty()) {
                 String[] productIds = data[3].split(ReturnRepository.PRODUCT_ID_SEPARATOR);
                 for (String productId : productIds) {
-                    returnedProducts.add(productService.findById(productId));
+                    Product resolved = productService.findById(productId);
+                    if (resolved == null) {
+                        resolved = accessoryService.findById(productId);
+                    }
+                    returnedProducts.add(resolved);
                 }
             }
 
