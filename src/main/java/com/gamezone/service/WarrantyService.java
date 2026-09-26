@@ -220,5 +220,32 @@ public class WarrantyService {
         }
         return null;
     }
+    /**
+     * Cancels every warranty associated with the given product within
+     * the given sale. This is used when a console is returned, since a
+     * returned console cannot keep an active warranty. Returns the total
+     * refundable cost of the canceled warranties: zero for a basic
+     * warranty, and its additional cost for an extended warranty.
+     *
+     * @param productId the identifier of the product whose warranties are canceled
+     * @param saleId    the identifier of the sale the warranties belong to
+     * @return the total refundable amount from the canceled warranties
+     */
+    public double cancelWarranties(String productId, String saleId) {
+        double refundableAmount = 0.0;
+        List<Warranty> toRemove = new ArrayList<>();
+
+        for (Warranty w : warranties) {
+            if (w.getProduct().getId().equals(productId) && w.getSale().getSaleId().equals(saleId)) {
+                refundableAmount += w.getAdditionalCost();
+                toRemove.add(w);
+            }
+        }
+
+        warranties.removeAll(toRemove);
+        persist();
+
+        return refundableAmount;
+    }
 
 }

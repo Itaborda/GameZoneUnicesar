@@ -107,3 +107,31 @@ ChatGPT
 - Asked Claude for Pull Request wording (problem, cause, solution, verification) for the fix/ branch.
 
 **Decision taken:** I adopted the String[]-based solution instead of creating an additional DTO class, applied the suggested changes to WarrantyRepository, WarrantyService and Main, updated the class diagram, and used the suggested commit and Pull Request wording for branch fix/warranty-circular-dependency.
+## Entry 12 - Service (ReturnService, ConsoleMenu) - Requirement 5, adjustment A6
+
+**Topic:** Monthly balance report showing only the net balance instead of sales, returns and balance separately.
+
+**Question:** I asked Claude how to add methods to ReturnService to expose the total monthly sales and total monthly returns separately, and how to update the monthly balance option in ConsoleMenu to display all three values.
+
+**Use of AI:**
+
+- Claude explained why generateMonthlyBalance could be simplified to delegate into the two new methods instead of duplicating the loop logic.
+- Claude wrote the JavaDoc comments for the two new methods.
+- Claude helped update showMonthlyBalance in ConsoleMenu to print sales, returns and balance, respecting the existing formatting style of the file.
+- Asked Claude for commit message wording and Pull Request wording (problem, cause, solution, verification) for the fix/ branch.
+
+**Decision taken:** I applied the corrected versions of calculateMonthlySales and calculateMonthlyReturns, replaced the body of generateMonthlyBalance to delegate into them, updated ConsoleMenu's showMonthlyBalance to show all three values, and used the suggested commit and Pull Request wording for branch fix/monthly-balance-report.
+
+## Entry 13 - Service and Model (WarrantyService, Return, ReturnService) - Requirement 5, adjustment A7
+
+**Topic:** Canceling a console's warranties when it is returned, since no requirement defined this behavior and a returned console should not keep an active warranty.
+
+**Question:** I asked Claude how to add a cancelWarranties method to WarrantyService, how to incorporate the refunded warranty cost into Return's refund calculation and receipt, and how to call this from ReturnService.registerReturn for each returned console.
+
+**Use of AI:**
+- Claude proposed the cancelWarranties(String productId, String saleId) method in WarrantyService, removing every matching warranty and summing their getAdditionalCost() (relying on BasicWarranty returning 0.0 and ExtendedWarranty returning 10% of the product's price).
+- Claude proposed adding WarrantyService as a new constructor dependency in ReturnService, and calling cancelWarranties for each returned Console instance inside registerReturn.
+- Claude helped verify the updated Main.java construction order (WarrantyService built before ReturnService) after the constructor signature changed.
+- Asked Claude for commit message wording for the feature/ branch.
+
+**Decision taken:** I applied the cancelWarranties method as proposed, updated Return and ReturnService accordingly, and updated Main.java to pass WarrantyService into ReturnService's constructor, keeping WarrantyService's construction before ReturnService's as required by the existing dependency order.

@@ -1785,8 +1785,22 @@ public class ConsoleMenu {
             return;
         }
 
+        double sales =
+                returnService.calculateMonthlySales(month, year);
+
+        double returns =
+                returnService.calculateMonthlyReturns(month, year);
+
         double balance =
                 returnService.generateMonthlyBalance(month, year);
+
+        System.out.println(
+                "Total de ventas del mes " + month + "/" + year + ": $" + sales
+        );
+
+        System.out.println(
+                "Total de devoluciones del mes " + month + "/" + year + ": $" + returns
+        );
 
         System.out.println(
                 "Balance del mes " + month + "/" + year + ": $" + balance
