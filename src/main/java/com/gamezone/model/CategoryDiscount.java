@@ -4,8 +4,8 @@ import java.time.LocalDate;
 
 /**
  * Represents a promotion that applies a percentage discount only to
- * the products of a specific category ("VIDEOGAME" or "CONSOLE")
- * included in a sale.
+ * the products of a specific category ("VIDEOGAME", "CONSOLE", or
+ * "ACCESSORY") included in a sale.
  */
 public class CategoryDiscount extends Promotion {
 
@@ -20,7 +20,7 @@ public class CategoryDiscount extends Promotion {
      * @param startDate          the date the promotion becomes valid
      * @param endDate            the date the promotion stops being valid
      * @param discountPercentage the percentage of the category subtotal to discount (0 to 100)
-     * @param targetCategory     the category this promotion applies to ("VIDEOGAME" or "CONSOLE")
+     * @param targetCategory     the category this promotion applies to ("VIDEOGAME", "CONSOLE", or "ACCESSORY")
      */
     public CategoryDiscount(String id, String name, LocalDate startDate, LocalDate endDate, double discountPercentage, String targetCategory) {
         super(id, name, startDate, endDate);
@@ -54,7 +54,7 @@ public class CategoryDiscount extends Promotion {
     /**
      * Returns the category this promotion applies to.
      *
-     * @return the target category ("VIDEOGAME" or "CONSOLE")
+     * @return the target category ("VIDEOGAME", "CONSOLE", or "ACCESSORY")
      */
     public String getTargetCategory() {
         return targetCategory;
@@ -63,7 +63,7 @@ public class CategoryDiscount extends Promotion {
     /**
      * Sets the category this promotion applies to.
      *
-     * @param targetCategory the new target category ("VIDEOGAME" or "CONSOLE")
+     * @param targetCategory the new target category ("VIDEOGAME", "CONSOLE", or "ACCESSORY")
      */
     public void setTargetCategory(String targetCategory) {
         this.targetCategory = targetCategory;
@@ -102,6 +102,8 @@ public class CategoryDiscount extends Promotion {
             return product instanceof VideoGame;
         } else if ("CONSOLE".equalsIgnoreCase(targetCategory)) {
             return product instanceof Console;
+        } else if ("ACCESSORY".equalsIgnoreCase(targetCategory)) {
+            return product instanceof Accessory;
         }
 
         return false;
