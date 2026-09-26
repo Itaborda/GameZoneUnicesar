@@ -2,7 +2,6 @@
 
 ```mermaid
 classDiagram
-
     class Warranty {
         <<abstract>>
         -String id
@@ -39,20 +38,30 @@ classDiagram
 
     class WarrantyRepository {
         -String filePath
-        +WarrantyRepository(...)
-        +void saveAll(List~Warranty~> warranties)
-        +List~Warranty~> loadAll()
+        +WarrantyRepository()
+        +void saveAll(List~String[]~ rows)
+        +List~String[]~ loadAll()
     }
 
     class WarrantyService {
         -WarrantyRepository warrantyRepository
-        +WarrantyService(WarrantyRepository warrantyRepository)
+        -SaleRepository saleRepository
+        -ProductService productService
+        +WarrantyService(WarrantyRepository warrantyRepository, SaleRepository saleRepository, ProductService productService)
         +BasicWarranty assignBasicWarranty(Product product, Sale sale, LocalDate startDate)
         +ExtendedWarranty assignExtendedWarranty(Product product, Sale sale, LocalDate startDate)
         +Warranty findWarrantyByProduct(String productId, String saleId)
-        +List~Warranty~> listAllWarranties()
-        +List~Warranty~> listActiveWarranties()
-        +List~Warranty~> listWarrantiesExpiringSoon(int daysAhead)
+        +List~Warranty~ listAllWarranties()
+        +List~Warranty~ listActiveWarranties()
+        +List~Warranty~ listWarrantiesExpiringSoon(int daysAhead)
+    }
+
+    class SaleRepository {
+        +List~Sale~ findAll()
+    }
+
+    class ProductService {
+        +Product findById(String productId)
     }
 
     class SaleService {
@@ -77,6 +86,8 @@ classDiagram
     Console --|> Product
 
     WarrantyService --> WarrantyRepository
+    WarrantyService --> SaleRepository
+    WarrantyService --> ProductService
     WarrantyService --> Warranty
 
     SaleService --> WarrantyService
