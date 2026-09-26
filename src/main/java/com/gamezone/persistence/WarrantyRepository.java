@@ -22,10 +22,10 @@ public class WarrantyRepository {
     /**
      * Creates a new WarrantyRepository using the default file path.
      */
-    public WarrantyRepository() {
-        this.filePath = "data/warranties.csv";
-
+    public WarrantyRepository(String filePath) {
+        this.filePath = filePath;
     }
+
     /**
      * Saves the given list of raw warranty rows to the file,
      * overwriting its previous content. Each row must follow the

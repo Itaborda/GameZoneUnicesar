@@ -1,9 +1,6 @@
 package com.gamezone.service;
 
-import com.gamezone.model.Accessory;
-import com.gamezone.model.Product;
-import com.gamezone.model.Return;
-import com.gamezone.model.Sale;
+import com.gamezone.model.*;
 import com.gamezone.persistence.ReturnRepository;
 import com.gamezone.persistence.SaleRepository;
 
@@ -25,6 +22,7 @@ public class ReturnService {
     private final SaleService saleService;
     private final ProductService productService;
     private final List<Return> returns;
+    private final WarrantyService warrantyService;
     /**
      * Constructs a new {@code ReturnService}.
      *
@@ -34,13 +32,14 @@ public class ReturnService {
      * @param returns          the in-memory list of registered returns
      * @param accessoryService the service used to manage accessory stock
      */
-    public ReturnService(AccessoryService accessoryService, SaleRepository saleRepository, ReturnRepository returnRepository, SaleService saleService, ProductService productService, List<Return> returns) {
+    public ReturnService(AccessoryService accessoryService, SaleRepository saleRepository, ReturnRepository returnRepository, SaleService saleService, ProductService productService, List<Return> returns, WarrantyService warrantyService) {
         this.accessoryService = accessoryService;
         this.saleRepository = saleRepository;
         this.returnRepository = returnRepository;
         this.saleService = saleService;
         this.productService = productService;
         this.returns = returns;
+        this.warrantyService = warrantyService;
     }
 
     /**
@@ -100,6 +99,14 @@ public class ReturnService {
 
         Return newReturn = new Return(returnId, returnDate, sale, returnedProducts, reason, 0);
         newReturn.calculateRefundAmount();
+        double totalWarrantyRefund = 0.0;
+
+        for (Product product : returnedProducts) {
+            if (product instanceof Console) {
+                totalWarrantyRefund += warrantyService.cancelWarranties(product.getId(), saleId);
+            }
+        }
+        newReturn.addWarrantyRefund(totalWarrantyRefund);
 
         for (Product product : returnedProducts) {
             if (product instanceof Accessory) {

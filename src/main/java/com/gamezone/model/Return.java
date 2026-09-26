@@ -12,6 +12,7 @@ import java.util.List;
 public class Return {
 
     private String returnId;
+    private double warrantyRefundAmount = 0;
     private LocalDate returnDate;
     private final Sale originalSale;
     private final List<Product> returnedProducts;
@@ -94,6 +95,16 @@ public class Return {
     }
 
     /**
+     * Returns the amount refunded from warranties canceled as part of
+     * this return.
+     *
+     * @return the refunded warranty amount
+     */
+    public double getWarrantyRefundAmount() {
+        return warrantyRefundAmount;
+    }
+
+    /**
      * Calculates the discount ratio applied to the original sale, that
      * is, the fraction of the items' subtotal that the promotion
      * discounted. This ratio is then applied to each individual
@@ -139,6 +150,17 @@ public class Return {
 
         return refundAmount;
     }
+    /**
+     * Adds the refundable amount from canceled warranties to this
+     * return's total refund amount, keeping it stored separately so it
+     * can be shown in the return receipt.
+     *
+     * @param warrantyRefundAmount the refundable amount from canceled warranties
+     */
+    public void addWarrantyRefund(double warrantyRefundAmount) {
+        this.warrantyRefundAmount = warrantyRefundAmount;
+        this.refundAmount += warrantyRefundAmount;
+    }
 
     /**
      * Generates a formatted receipt, in Spanish, describing this
@@ -160,6 +182,7 @@ public class Return {
         receipt.append("Fecha: ").append(returnDate).append("\n");
         receipt.append("Venta original: ").append(originalSale.getSaleId()).append("\n");
         receipt.append("Productos devueltos:\n");
+        receipt.append("Reembolso por garantías canceladas: $").append(warrantyRefundAmount).append("\n");
 
         for (Product product : returnedProducts) {
             double listPrice = product.getPrice();

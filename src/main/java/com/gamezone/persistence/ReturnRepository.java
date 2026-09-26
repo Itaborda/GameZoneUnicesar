@@ -38,7 +38,7 @@ public class ReturnRepository {
         this.accessoryService = accessoryService;
         this.saleService = saleService;
         this.productService = productService;
-        this.filePath = "data/return.csv";
+        this.filePath = filePath;
     }
 
 
