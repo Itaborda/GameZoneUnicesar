@@ -1,0 +1,2 @@
+type,id,name,startDate,endDate,percentage,targetCategory,minimumQuantity
+CATEGORY,PROMO-ACC-01,Descuento de accesorios de la semana,2026-09-21,2026-09-27,15.0,ACCESSORY,
