@@ -1510,7 +1510,8 @@ public class ConsoleMenu {
 
             double subtotal = sale.calculateTotal();
             double discount = sale.getDiscountAmount();
-            double finalTotal = subtotal - discount;
+            double warrantyCost = sale.getWarrantyAdditionalCost();
+            double finalTotal = subtotal - discount + warrantyCost;
 
             System.out.println(
                     "\nID Venta: " + sale.getSaleId()
@@ -1536,6 +1537,10 @@ public class ConsoleMenu {
                 System.out.println("Promoción aplicada: Ninguna");
                 System.out.println("Descuento: $0.0");
             }
+
+            System.out.println(
+                    "Garantía extendida: $" + warrantyCost
+            );
 
             System.out.println("Total final: $" + finalTotal);
         });
@@ -1787,4 +1792,5 @@ public class ConsoleMenu {
                 "Balance del mes " + month + "/" + year + ": $" + balance
         );
     }
+
 }
