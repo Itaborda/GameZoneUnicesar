@@ -29,7 +29,7 @@ public class Main {
                         new PromotionRepository("data/promotions.csv");
 
                 WarrantyRepository warrantyRepository =
-                        new WarrantyRepository();
+                        new WarrantyRepository("data/Warranties.csv");
 
                 PromotionService promotionService =
                         new PromotionService(promotionRepository);

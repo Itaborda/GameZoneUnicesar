@@ -25,12 +25,7 @@ public class AccessoryRepository {
     public AccessoryRepository(String filePath) {
         this.filePath = filePath;
     }
-    /**
-     * Creates a new AccessoryRepository using the default file path.
-     */
-    public AccessoryRepository() {
-        this.filePath = "data/accessories.csv";
-    }
+
     /**
      * Saves the given list of accessories to the file, overwriting its
      * previous content. Each line represents one accessory, with the
