@@ -136,5 +136,30 @@ public class AccessoryService {
 
         accessoryRepository.saveAll(accessories);
     }
+    /**
+     * Restores stock for the accessory with the given id, adding the
+     * given quantity back to its current stock, and persists the
+     * change to the repository. Used when an accessory is returned.
+     *
+     * @param accessoryId the id of the accessory to restore stock for
+     * @param quantity    the quantity to add back to stock
+     */
+    public void restoreStock(String accessoryId, int quantity) {
+        Accessory accessory = findById(accessoryId);
+
+        if (accessory == null) {
+            throw new IllegalArgumentException("Accessory not found");
+        }
+
+        if (quantity < 0) {
+            throw new IllegalArgumentException("Quantity cannot be negative");
+        }
+
+        accessory.setStockQuantity(
+                accessory.getStockQuantity() + quantity
+        );
+
+        accessoryRepository.saveAll(accessories);
+    }
 }
 
