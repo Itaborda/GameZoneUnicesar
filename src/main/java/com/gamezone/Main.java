@@ -72,10 +72,12 @@ public class Main {
                 ReturnService returnService =
                         new ReturnService(
                                 accessoryService,
+                                saleRepository,
                                 returnRepository,
                                 saleService,
                                 productService,
-                                returns
+                                returns,
+                                warrantyService
                         );
 
                 // Main Menu
