@@ -29,10 +29,7 @@ public class Main {
                         new PromotionRepository("data/promotions.csv");
 
                 WarrantyRepository warrantyRepository =
-                        new WarrantyRepository(
-                                productRepository,
-                                saleRepository
-                        );
+                        new WarrantyRepository();
 
                 PromotionService promotionService =
                         new PromotionService(promotionRepository);
@@ -51,7 +48,11 @@ public class Main {
                         new PersonService(personRepository, people);
 
                 WarrantyService warrantyService =
-                        new WarrantyService(warrantyRepository);
+                        new WarrantyService(
+                                warrantyRepository,
+                                saleRepository,
+                                productService
+                        );
 
                 SaleService saleService =
                         new SaleService(
@@ -63,16 +64,17 @@ public class Main {
                         );
 
                 ReturnRepository returnRepository =
-                        new ReturnRepository(saleService, productService);
+                        new ReturnRepository(accessoryService,saleService,productService);
 
                 List<Return> returns =
                         returnRepository.loadAll();
 
                 ReturnService returnService =
                         new ReturnService(
-                                productService,
+                                accessoryService,
                                 returnRepository,
                                 saleService,
+                                productService,
                                 returns
                         );
 

@@ -419,7 +419,7 @@ public class ConsoleMenu {
             scanner.nextLine();
 
             System.out.print(
-                    "Categoría objetivo (VIDEOGAME/CONSOLE): "
+                    "Categoría objetivo (VIDEOGAME/CONSOLE/ACCESSORY): "
             );
             String targetCategory = scanner.nextLine().trim().toUpperCase();
 

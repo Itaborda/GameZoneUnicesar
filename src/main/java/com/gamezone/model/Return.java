@@ -94,17 +94,45 @@ public class Return {
     }
 
     /**
-     * Calculates the refund amount by summing the price of every
-     * returned product, assigns the resulting value to this return,
-     * and returns it.
+     * Calculates the discount ratio applied to the original sale, that
+     * is, the fraction of the items' subtotal that the promotion
+     * discounted. This ratio is then applied to each individual
+     * returned item so that the refund reflects the discount the
+     * customer actually paid for, instead of the full list price.
+     *
+     * @return the discount ratio (between 0 and 1), or 0 if the
+     * original sale's items subtotal is zero
+     */
+    private double calculateDiscountRatio() {
+        double itemsSubtotal = 0;
+
+        for (Product product : originalSale.getProducts()) {
+            itemsSubtotal += product.getPrice();
+        }
+
+        if (itemsSubtotal <= 0) {
+            return 0;
+        }
+
+        return originalSale.getDiscountAmount() / itemsSubtotal;
+    }
+
+    /**
+     * Calculates the refund amount by applying, to each returned
+     * product, the same discount proportion that the original sale
+     * received: price x (1 - discount / subtotal). This prevents
+     * refunding more than what the customer actually paid when the
+     * original sale had a promotion applied. Assigns the resulting
+     * value to this return and returns it.
      *
      * @return the calculated refund amount
      */
     public double calculateRefundAmount() {
+        double discountRatio = calculateDiscountRatio();
         double total = 0;
 
         for (Product product : returnedProducts) {
-            total += product.getPrice();
+            total += product.getPrice() * (1 - discountRatio);
         }
 
         this.refundAmount = total;
@@ -115,12 +143,16 @@ public class Return {
     /**
      * Generates a formatted receipt, in Spanish, describing this
      * return: its identifier, date, the original sale it references,
-     * the returned products with their prices, the reason, and the
+     * and the returned products with their list price, the proportional
+     * discount inherited from the original sale, and the amount
+     * refunded for each one, along with the reason and the total
      * refunded amount.
      *
      * @return a formatted string describing the return
      */
     public String generateReturnReceipt() {
+        double discountRatio = calculateDiscountRatio();
+
         StringBuilder receipt = new StringBuilder();
 
         receipt.append("\n===== COMPROBANTE DE DEVOLUCION =====\n");
@@ -130,8 +162,14 @@ public class Return {
         receipt.append("Productos devueltos:\n");
 
         for (Product product : returnedProducts) {
+            double listPrice = product.getPrice();
+            double proportionalDiscount = listPrice * discountRatio;
+            double itemRefund = listPrice - proportionalDiscount;
+
             receipt.append("- ").append(product.getTitle())
-                    .append(" | Precio: $").append(product.getPrice())
+                    .append(" | Precio de lista: $").append(listPrice)
+                    .append(" | Descuento proporcional: $").append(proportionalDiscount)
+                    .append(" | Monto reembolsado: $").append(itemRefund)
                     .append("\n");
         }
 

@@ -6,6 +6,7 @@ import com.gamezone.persistence.PromotionRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 /**
  * Provides the business logic for managing promotions in the
  * GameZone system. This service is the only class authorized to
@@ -15,6 +16,13 @@ import java.util.List;
  * for selecting the best applicable promotion for a given sale.
  */
 public class PromotionService {
+
+    /**
+     * Categories accepted as the target of a {@link CategoryDiscount}.
+     */
+    private static final Set<String> ALLOWED_CATEGORY_DISCOUNT_TARGETS =
+            Set.of("VIDEOGAME", "CONSOLE", "ACCESSORY");
+
     private PromotionRepository promotionRepository = new PromotionRepository("data/promotions.csv");
     private List<Promotion> promotions;
     /**
@@ -42,8 +50,21 @@ public class PromotionService {
      * list and persisting the updated list to the repository.
      *
      * @param p the category discount to register
+     * @throws IllegalArgumentException if the promotion's target category is not
+     *                                   one of the categories allowed for a category discount
+     *                                   (VIDEOGAME, CONSOLE, or ACCESSORY)
      */
     public void registerCategoryDiscount(CategoryDiscount p) {
+        String targetCategory = p.getTargetCategory();
+        boolean isAllowed = targetCategory != null
+                && ALLOWED_CATEGORY_DISCOUNT_TARGETS.contains(targetCategory.toUpperCase());
+
+        if (!isAllowed) {
+            throw new IllegalArgumentException(
+                    "La categoría objetivo debe ser VIDEOGAME, CONSOLE o ACCESSORY."
+            );
+        }
+
         promotions.add(p);
         promotionRepository.saveAll(promotions);
     }
