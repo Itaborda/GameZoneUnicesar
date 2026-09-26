@@ -1,5 +1,6 @@
 package com.gamezone.service;
 
+import com.gamezone.model.Accessory;
 import com.gamezone.model.Product;
 import com.gamezone.model.Return;
 import com.gamezone.model.Sale;
@@ -18,6 +19,7 @@ import java.util.List;
  */
 public class ReturnService {
     private final ReturnRepository returnRepository;
+    private final AccessoryService accessoryService;
     private final SaleService saleService;
     private final ProductService productService;
     private final List<Return> returns;
@@ -28,21 +30,25 @@ public class ReturnService {
      * @param returnRepository the repository used to persist returns
      * @param saleService      the service used to look up existing sales
      * @param returns          the in-memory list of registered returns
+     * @param accessoryService the service used to manage accessory stock
      */
-    public ReturnService(ProductService productService, ReturnRepository returnRepository, SaleService saleService, List<Return> returns) {
-        this.productService = productService;
+    public ReturnService(AccessoryService accessoryService, ReturnRepository returnRepository, SaleService saleService, ProductService productService, List<Return> returns) {
+        this.accessoryService = accessoryService;
         this.returnRepository = returnRepository;
         this.saleService = saleService;
+        this.productService = productService;
         this.returns = returns;
     }
+
     /**
      * Registers a new return for a given sale.
      * <p>
      * Validates that the sale exists and is still within the allowed return
      * period (30 days). Each product id provided must belong to the original
      * sale; otherwise, an exception is thrown. Once validated, the refund
-     * amount is calculated, the stock of each returned product is restored,
-     * and the new return is persisted.
+     * amount is calculated, the stock of each returned item is restored
+     * through {@code ProductService} or {@code AccessoryService} depending
+     * on its type, and the new return is persisted.
      *
      * @param saleId     the id of the original sale
      * @param productIds the ids of the products being returned
@@ -93,7 +99,11 @@ public class ReturnService {
         newReturn.calculateRefundAmount();
 
         for (Product product : returnedProducts) {
-        productService.restoreStock(product.getId(), 1);
+            if (product instanceof Accessory) {
+                accessoryService.restoreStock(product.getId(), 1);
+            } else {
+                productService.restoreStock(product.getId(), 1);
+            }
         }
 
         returns.add(newReturn);
