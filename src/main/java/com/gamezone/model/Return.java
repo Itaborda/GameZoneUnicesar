@@ -143,12 +143,16 @@ public class Return {
     /**
      * Generates a formatted receipt, in Spanish, describing this
      * return: its identifier, date, the original sale it references,
-     * the returned products with their prices, the reason, and the
+     * and the returned products with their list price, the proportional
+     * discount inherited from the original sale, and the amount
+     * refunded for each one, along with the reason and the total
      * refunded amount.
      *
      * @return a formatted string describing the return
      */
     public String generateReturnReceipt() {
+        double discountRatio = calculateDiscountRatio();
+
         StringBuilder receipt = new StringBuilder();
 
         receipt.append("\n===== COMPROBANTE DE DEVOLUCION =====\n");
@@ -158,8 +162,14 @@ public class Return {
         receipt.append("Productos devueltos:\n");
 
         for (Product product : returnedProducts) {
+            double listPrice = product.getPrice();
+            double proportionalDiscount = listPrice * discountRatio;
+            double itemRefund = listPrice - proportionalDiscount;
+
             receipt.append("- ").append(product.getTitle())
-                    .append(" | Precio: $").append(product.getPrice())
+                    .append(" | Precio de lista: $").append(listPrice)
+                    .append(" | Descuento proporcional: $").append(proportionalDiscount)
+                    .append(" | Monto reembolsado: $").append(itemRefund)
                     .append("\n");
         }
 
