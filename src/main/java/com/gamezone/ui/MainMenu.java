@@ -1,4 +1,3 @@
-
 package com.gamezone.ui;
 
 import com.gamezone.model.Console;
@@ -417,6 +416,9 @@ public class MainMenu {
         } while (option != 0);
     }
 
+    /**
+     * Registers a sale and manages extended warranty selection.
+     */
     private void registerSale() {
 
         System.out.println("\n===== REGISTRAR VENTA =====");
@@ -523,6 +525,21 @@ public class MainMenu {
         List<Product> products = new ArrayList<>();
         products.add(product);
 
+        List<String> productIdsWithExtendedWarranty = new ArrayList<>();
+
+        if (product instanceof Console) {
+
+            System.out.print(
+                    "¿Desea agregar garantía extendida a esta consola? (S/N): "
+            );
+
+            String warrantyOption = scanner.nextLine();
+
+            if (warrantyOption.equalsIgnoreCase("S")) {
+                productIdsWithExtendedWarranty.add(product.getId());
+            }
+        }
+
         Sale sale = new Sale(
                 saleId,
                 date,
@@ -533,16 +550,22 @@ public class MainMenu {
 
         try {
 
-            saleService.registerSale(sale);
+            saleService.registerSale(
+                    sale,
+                    productIdsWithExtendedWarranty
+            );
 
             System.out.println("\nVenta registrada correctamente.");
-            System.out.println("Total de la venta: " + sale.calculateTotal());
+            System.out.println(sale.generateReceipt());
 
         } catch (IllegalArgumentException e) {
 
-            System.out.println("No se pudo registrar la venta: " + e.getMessage());
+            System.out.println(
+                    "No se pudo registrar la venta: " + e.getMessage()
+            );
         }
     }
+
     /**
      * Displays all registered sales using SaleService.
      */
@@ -563,9 +586,13 @@ public class MainMenu {
                                 + " | Fecha: " + sale.getDate()
                                 + " | Cliente: " + sale.getCustomer().getName()
                                 + " | Vendedor: " + sale.getSeller().getName()
-                                + " | Total: " + sale.calculateTotal()
+                                + " | Total: "
+                                + (
+                                sale.calculateTotal()
+                                        - sale.getDiscountAmount()
+                                        + sale.getWarrantyAdditionalCost()
+                        )
                 )
         );
     }
 }
-
