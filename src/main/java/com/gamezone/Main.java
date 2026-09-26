@@ -63,16 +63,17 @@ public class Main {
                         );
 
                 ReturnRepository returnRepository =
-                        new ReturnRepository(saleService, productService);
+                        new ReturnRepository(accessoryService,saleService,productService);
 
                 List<Return> returns =
                         returnRepository.loadAll();
 
                 ReturnService returnService =
                         new ReturnService(
-                                productService,
+                                accessoryService,
                                 returnRepository,
                                 saleService,
+                                productService,
                                 returns
                         );
 
