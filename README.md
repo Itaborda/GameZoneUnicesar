@@ -103,3 +103,54 @@ The main goal of the integration is to allow accessories, promotions, returns, a
 The business logic is concentrated in the service layer, while the UI is responsible for interacting with the user and the persistence layer is responsible for storing the information.
 
 This structure helps keep the different modules connected without mixing their responsibilities.
+
+## Validation and Exception Handling
+
+The system includes a custom exception hierarchy and validation classes to improve error handling and protect business rules.
+
+### Custom Exception Hierarchy
+
+All custom exceptions extend `GameZoneException`, which extends `RuntimeException` and provides an error code to identify the type of error.
+
+The exception hierarchy includes:
+
+* `GameZoneException`: Base class for application-specific exceptions.
+* `ResourceNotFoundException`: Indicates that a requested resource could not be found.
+* `BusinessRuleException`: Indicates that an operation violates a business rule.
+* `InvalidDataException`: Indicates that input data is invalid.
+* `PersistenceException`: Indicates a problem while accessing or storing data.
+
+### Validation Layer
+
+The package `com.gamezone.validation` contains validators responsible for checking data before business operations are executed.
+
+The validation layer includes:
+
+* `ProductValidator`: Validates product information.
+* `PersonValidator`: Validates customer and seller information.
+* `SaleValidator`: Validates sale information and its required conditions.
+
+Validators are used by the service layer, keeping validation rules separate from user interaction and persistence responsibilities.
+
+### Error Handling in the Console
+
+`ConsoleMenu` handles custom exceptions and displays appropriate messages in Spanish according to the type of error. This helps users understand what happened without exposing technical details or stack traces.
+
+Persistence errors are handled with a general message that recommends contacting the system administrator.
+
+### Running Tests
+
+To execute the automated tests, run the following command from the project root directory:
+
+```bash
+mvn test
+```
+
+The tests help verify that the existing functionality continues to work after the validation and exception-handling changes.
+
+### Additional Documentation
+
+The following documents describe the exception design:
+
+* `docs/exception-analysis.md`: Analysis of the exception hierarchy, validation layer, and error-handling decisions.
+* `docs/exception-class-diagram.md`: Mermaid class diagram showing the exception hierarchy and its relationships with the validation layer, services, and console interface.
