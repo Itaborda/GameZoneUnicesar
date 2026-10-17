@@ -1,5 +1,9 @@
 package com.gamezone.service;
 
+import com.gamezone.exceptions.BusinessRuleException;
+import com.gamezone.exceptions.ResourceNotFoundException;
+import com.gamezone.validation.ProductValidator;
+import com.gamezone.validation.SaleValidator;
 import com.gamezone.model.Accessory;
 import com.gamezone.model.Console;
 import com.gamezone.model.ExtendedWarranty;
@@ -30,6 +34,8 @@ public class SaleService {
      * @param accessoryService service used to manage accessory stock
      * @param promotionService service used to manage promotions
      * @param warrantyService service used to manage warranties
+     * @throws BusinessRuleException
+     * @throws ResourceNotFoundException
      */
     public SaleService(SaleRepository salePersistence,
                        ProductService productService,
@@ -54,55 +60,22 @@ public class SaleService {
      *                                  an item does not exist,
      *                                  or there is insufficient stock
      */
-    public void registerSale(
-            Sale sale,
-            List<String> productIdsWithExtendedWarranty) {
+    public void registerSale(Sale sale, List<String> productIdsWithExtendedWarranty) {
 
         // Step 1: Validate that the sale contains at least one item.
-        if (sale.getProducts() == null || sale.getProducts().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "A sale must contain at least one item."
-            );
-        }
+        SaleValidator.validateSaleData(sale.getCustomer(), sale.getSeller(), sale.getProducts());
 
         // Step 2: Resolve every item and validate its available stock.
         for (Product product : sale.getProducts()) {
-
             if (product instanceof Accessory) {
-
-                Accessory accessory =
-                        accessoryService.findById(product.getId());
-
-                if (accessory == null) {
-                    throw new IllegalArgumentException(
-                            "Accessory not found: " + product.getId()
-                    );
-                }
-
-                if (accessory.getStockQuantity() < 1) {
-                    throw new IllegalArgumentException(
-                            "Insufficient stock for accessory: "
-                                    + product.getId()
-                    );
-                }
-
+                Accessory accessory = accessoryService.findById(product.getId());
+                ProductValidator.validateProductExists(accessory, product.getId());
+                ProductValidator.validateStockAvailability(accessory, 1);
             } else {
-
-                Product storedProduct =
-                        productService.findById(product.getId());
-
-                if (storedProduct == null) {
-                    throw new IllegalArgumentException(
-                            "Product not found: " + product.getId()
-                    );
-                }
-
-                if (storedProduct.getStockQuantity() < 1) {
-                    throw new IllegalArgumentException(
-                            "Insufficient stock for product: "
-                                    + product.getId()
-                    );
-                }
+                Product storedProduct = productService.findById(product.getId());
+                ProductValidator.validateProductExists(storedProduct,
+                        product.getId());
+                ProductValidator.validateStockAvailability(storedProduct, 1);
             }
         }
 
@@ -187,6 +160,7 @@ public class SaleService {
         // Step 8: Persist the sale after all previous steps succeed.
         salePersistence.save(sale);
     }
+
 
     /**
      * Returns all registered sales.
