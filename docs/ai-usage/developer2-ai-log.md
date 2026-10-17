@@ -163,3 +163,14 @@ the external behavior.
 **Decision taken:** I used it to understand my changes before explaining
 them in the oral defense; I will write the guiding-question answers in
 my own words.
+
+## Entry 17 - Updating JavaDocs
+
+**Question:** I asked for help updating the JavaDocs of the classes and
+methods I modified in R6.
+**Use of AI:** I received general guidance on how to write JavaDoc in
+English and which @throws tags to use for the new custom exceptions.
+**What I did myself:** I reviewed each comment to make sure it matches
+what the code does now.
+**Decision taken:** I kept all JavaDocs in English and replaced the
+IllegalArgumentException tags with the custom exceptions.

@@ -16,9 +16,10 @@ public class ProductService {
     ProductRepository repository = new ProductRepository("data/product.csv");
 
     /**
-     * In-memory cache of the list of products.
+     * In-memory cache of the list of products. It is loaded from the
+     * repository when the service is created, so it is never {@code null}.
      */
-    private List<Product> products;
+    private List<Product> products= repository.findAll();
 
     /**
      * Registers a new product by appending it to the in-memory list

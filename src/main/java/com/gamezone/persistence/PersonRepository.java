@@ -58,7 +58,7 @@ public class PersonRepository {
                             + c.getPhone() + ","
                             + c.getEmail() + ", ,";
                 } else if (p instanceof Seller) {
-                    Seller s = (Seller) person;
+                    Seller s = (Seller) p;
                     line= s.getRole() + ","
                             + s.getId() + ","
                             + s.getName() + ","
