@@ -23,11 +23,16 @@ import com.gamezone.service.ReturnService;
 import com.gamezone.service.AccessoryService;
 import com.gamezone.service.PromotionService;
 import com.gamezone.service.WarrantyService;
+import com.gamezone.exceptions.BusinessRuleException;
+import com.gamezone.exceptions.InvalidDataException;
+import com.gamezone.exceptions.PersistenceException;
+import com.gamezone.exceptions.ResourceNotFoundException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.time.format.DateTimeParseException;
 
 /**
  * Displays the main menu and the submenus of the GameZone application.
@@ -90,8 +95,7 @@ public class ConsoleMenu {
             System.out.println("7. Gestión de garantías");
             System.out.println("0. Salir");
 
-            option = scanner.nextInt();
-            scanner.nextLine();
+            option = readInt("Seleccione una opción: ");
 
             switch (option) {
 
@@ -148,10 +152,8 @@ public class ConsoleMenu {
             System.out.println("3. Listar garantías activas");
             System.out.println("4. Listar garantías próximas a vencer");
             System.out.println("0. Volver");
-            System.out.print("Seleccione una opción: ");
 
-            option = scanner.nextInt();
-            scanner.nextLine();
+            option = readInt("Seleccione una opción: ");
 
             switch (option) {
 
@@ -182,6 +184,7 @@ public class ConsoleMenu {
         } while (option != 0);
     }
 
+
     /**
      * Finds a warranty associated with a product in a specific sale.
      */
@@ -189,27 +192,62 @@ public class ConsoleMenu {
 
         System.out.println("\n===== CONSULTAR GARANTÍA =====");
 
-        System.out.print("ID del producto: ");
-        String productId = scanner.nextLine();
+        try {
+            System.out.print("ID del producto: ");
+            String productId = scanner.nextLine();
 
-        System.out.print("ID de la venta: ");
-        String saleId = scanner.nextLine();
+            System.out.print("ID de la venta: ");
+            String saleId = scanner.nextLine();
 
-        Warranty warranty =
-                warrantyService.findWarrantyByProduct(
-                        productId,
-                        saleId
+            Warranty warranty =
+                    warrantyService.findWarrantyByProduct(
+                            productId,
+                            saleId
+                    );
+
+            if (warranty == null) {
+                System.out.println(
+                        "No se encontró una garantía para ese producto y venta."
                 );
+                return;
+            }
 
-        if (warranty == null) {
+            System.out.println(warranty.generateWarrantyCertificate());
+
+        } catch (ResourceNotFoundException e) {
+
             System.out.println(
-                    "No se encontró una garantía para ese producto y venta."
+                    "No se encontró el recurso solicitado: " + e.getMessage()
             );
-            return;
-        }
 
-        System.out.println(warranty.generateWarrantyCertificate());
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println(
+                    "No se pudo consultar la garantía. "
+                            + "Verifique los identificadores ingresados."
+            );
+        }
     }
+
 
     /**
      * Displays all registered warranties.
@@ -218,20 +256,49 @@ public class ConsoleMenu {
 
         System.out.println("\n===== TODAS LAS GARANTÍAS =====");
 
-        List<Warranty> warranties =
-                warrantyService.listAllWarranties();
+        try {
+            List<Warranty> warranties =
+                    warrantyService.listAllWarranties();
 
-        if (warranties.isEmpty()) {
-            System.out.println("No hay garantías registradas.");
-            return;
-        }
+            if (warranties.isEmpty()) {
+                System.out.println("No hay garantías registradas.");
+                return;
+            }
 
-        for (Warranty warranty : warranties) {
+            for (Warranty warranty : warranties) {
+                System.out.println(
+                        warranty.generateWarrantyCertificate()
+                );
+            }
+
+        } catch (ResourceNotFoundException e) {
+
             System.out.println(
-                    warranty.generateWarrantyCertificate()
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
             );
         }
     }
+
+
 
     /**
      * Displays all currently active warranties.
@@ -240,20 +307,49 @@ public class ConsoleMenu {
 
         System.out.println("\n===== GARANTÍAS ACTIVAS =====");
 
-        List<Warranty> warranties =
-                warrantyService.listActiveWarranties();
+        try {
+            List<Warranty> warranties =
+                    warrantyService.listActiveWarranties();
 
-        if (warranties.isEmpty()) {
-            System.out.println("No hay garantías activas.");
-            return;
-        }
+            if (warranties.isEmpty()) {
+                System.out.println("No hay garantías activas.");
+                return;
+            }
 
-        for (Warranty warranty : warranties) {
+            for (Warranty warranty : warranties) {
+                System.out.println(
+                        warranty.generateWarrantyCertificate()
+                );
+            }
+
+        } catch (ResourceNotFoundException e) {
+
             System.out.println(
-                    warranty.generateWarrantyCertificate()
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
             );
         }
     }
+
+
 
     /**
      * Displays warranties expiring within a specified number of days.
@@ -262,36 +358,61 @@ public class ConsoleMenu {
 
         System.out.println("\n===== GARANTÍAS PRÓXIMAS A VENCER =====");
 
-        System.out.print(
-                "¿Cuántos días hacia adelante desea consultar?: "
-        );
-
-        int daysAhead = scanner.nextInt();
-        scanner.nextLine();
-
-        if (daysAhead < 0) {
-            System.out.println(
-                    "Los días deben ser mayores o iguales a cero."
+        try {
+            int daysAhead = readInt(
+                    "¿Cuántos días hacia adelante desea consultar?: "
             );
-            return;
-        }
 
-        List<Warranty> warranties =
-                warrantyService.listWarrantiesExpiringSoon(daysAhead);
+            if (daysAhead < 0) {
+                System.out.println(
+                        "Los días deben ser mayores o iguales a cero."
+                );
+                return;
+            }
 
-        if (warranties.isEmpty()) {
+            List<Warranty> warranties =
+                    warrantyService.listWarrantiesExpiringSoon(daysAhead);
+
+            if (warranties.isEmpty()) {
+                System.out.println(
+                        "No hay garantías que venzan dentro del período indicado."
+                );
+                return;
+            }
+
+            for (Warranty warranty : warranties) {
+                System.out.println(
+                        warranty.generateWarrantyCertificate()
+                );
+            }
+
+        } catch (ResourceNotFoundException e) {
+
             System.out.println(
-                    "No hay garantías que venzan dentro del período indicado."
+                    "No se encontró el recurso solicitado: " + e.getMessage()
             );
-            return;
-        }
 
-        for (Warranty warranty : warranties) {
+        } catch (InvalidDataException e) {
+
             System.out.println(
-                    warranty.generateWarrantyCertificate()
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
             );
         }
     }
+
 
     /**
      * Displays the promotion management submenu.
@@ -308,10 +429,7 @@ public class ConsoleMenu {
             System.out.println("4. Listar todas las promociones");
             System.out.println("5. Listar promociones activas");
             System.out.println("0. Volver");
-            System.out.print("Seleccione una opción: ");
-
-            option = scanner.nextInt();
-            scanner.nextLine();
+            option = readInt("Seleccione una opción: ");
 
             switch (option) {
 
@@ -346,6 +464,7 @@ public class ConsoleMenu {
         } while (option != 0);
     }
 
+
     /**
      * Registers a percentage discount promotion.
      */
@@ -360,15 +479,14 @@ public class ConsoleMenu {
             System.out.print("Nombre de la promoción: ");
             String name = scanner.nextLine();
 
-            System.out.print("Fecha de inicio (YYYY-MM-DD): ");
-            LocalDate startDate = LocalDate.parse(scanner.nextLine());
+            LocalDate startDate =
+                    readDate("Fecha de inicio (YYYY-MM-DD): ");
 
-            System.out.print("Fecha de finalización (YYYY-MM-DD): ");
-            LocalDate endDate = LocalDate.parse(scanner.nextLine());
+            LocalDate endDate =
+                    readDate("Fecha de finalización (YYYY-MM-DD): ");
 
-            System.out.print("Porcentaje de descuento: ");
-            double discountPercentage = scanner.nextDouble();
-            scanner.nextLine();
+            double discountPercentage =
+                    readDouble("Porcentaje de descuento: ");
 
             PercentageDiscount promotion =
                     new PercentageDiscount(
@@ -385,14 +503,40 @@ public class ConsoleMenu {
                     "Descuento porcentual registrado correctamente."
             );
 
+        } catch (ResourceNotFoundException e) {
+
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+
         } catch (IllegalArgumentException e) {
 
             System.out.println(
-                    "No se pudo registrar la promoción: "
-                            + e.getMessage()
+                    "No se pudo registrar la promoción. "
+                            + "Verifique los datos ingresados."
             );
         }
     }
+
 
     /**
      * Registers a category discount promotion.
@@ -408,20 +552,17 @@ public class ConsoleMenu {
             System.out.print("Nombre de la promoción: ");
             String name = scanner.nextLine();
 
-            System.out.print("Fecha de inicio (YYYY-MM-DD): ");
-            LocalDate startDate = LocalDate.parse(scanner.nextLine());
+            LocalDate startDate =
+                    readDate("Fecha de inicio (YYYY-MM-DD): ");
 
-            System.out.print("Fecha de finalización (YYYY-MM-DD): ");
-            LocalDate endDate = LocalDate.parse(scanner.nextLine());
+            LocalDate endDate =
+                    readDate("Fecha de finalización (YYYY-MM-DD): ");
 
-            System.out.print("Porcentaje de descuento: ");
-            double discountPercentage = scanner.nextDouble();
-            scanner.nextLine();
+            System.out.print("Categoría del producto: ");
+            String category = scanner.nextLine();
 
-            System.out.print(
-                    "Categoría objetivo (VIDEOGAME/CONSOLE/ACCESSORY): "
-            );
-            String targetCategory = scanner.nextLine().trim().toUpperCase();
+            double discountPercentage =
+                    readDouble("Porcentaje de descuento: ");
 
             CategoryDiscount promotion =
                     new CategoryDiscount(
@@ -430,7 +571,7 @@ public class ConsoleMenu {
                             startDate,
                             endDate,
                             discountPercentage,
-                            targetCategory
+                            category
                     );
 
             promotionService.registerCategoryDiscount(promotion);
@@ -439,21 +580,48 @@ public class ConsoleMenu {
                     "Descuento por categoría registrado correctamente."
             );
 
+        } catch (ResourceNotFoundException e) {
+
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+
         } catch (IllegalArgumentException e) {
 
             System.out.println(
-                    "No se pudo registrar la promoción: "
-                            + e.getMessage()
+                    "No se pudo registrar la promoción. "
+                            + "Verifique los datos ingresados."
             );
         }
     }
+
+
 
     /**
      * Registers a bulk purchase discount promotion.
      */
     private void registerBulkPurchaseDiscount() {
 
-        System.out.println("\n===== REGISTRAR DESCUENTO POR VOLUMEN =====");
+        System.out.println("\n===== REGISTRAR DESCUENTO POR COMPRA AL POR MAYOR =====");
 
         try {
             System.out.print("ID de la promoción: ");
@@ -462,18 +630,17 @@ public class ConsoleMenu {
             System.out.print("Nombre de la promoción: ");
             String name = scanner.nextLine();
 
-            System.out.print("Fecha de inicio (YYYY-MM-DD): ");
-            LocalDate startDate = LocalDate.parse(scanner.nextLine());
+            LocalDate startDate =
+                    readDate("Fecha de inicio (YYYY-MM-DD): ");
 
-            System.out.print("Fecha de finalización (YYYY-MM-DD): ");
-            LocalDate endDate = LocalDate.parse(scanner.nextLine());
+            LocalDate endDate =
+                    readDate("Fecha de finalización (YYYY-MM-DD): ");
 
-            System.out.print("Cantidad mínima de productos: ");
-            int minimumQuantity = scanner.nextInt();
+            int minimumQuantity =
+                    readInt("Cantidad mínima de productos: ");
 
-            System.out.print("Porcentaje de descuento: ");
-            double discountPercentage = scanner.nextDouble();
-            scanner.nextLine();
+            double discountPercentage =
+                    readDouble("Porcentaje de descuento: ");
 
             BulkPurchaseDiscount promotion =
                     new BulkPurchaseDiscount(
@@ -488,17 +655,43 @@ public class ConsoleMenu {
             promotionService.registerBulkPurchaseDiscount(promotion);
 
             System.out.println(
-                    "Descuento por volumen registrado correctamente."
+                    "Descuento por compra al por mayor registrado correctamente."
+            );
+
+        } catch (ResourceNotFoundException e) {
+
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
             );
 
         } catch (IllegalArgumentException e) {
 
             System.out.println(
-                    "No se pudo registrar la promoción: "
-                            + e.getMessage()
+                    "No se pudo registrar la promoción. "
+                            + "Verifique los datos ingresados."
             );
         }
     }
+
 
     /**
      * Displays all registered promotions.
@@ -507,18 +700,47 @@ public class ConsoleMenu {
 
         System.out.println("\n===== TODAS LAS PROMOCIONES =====");
 
-        List<Promotion> promotions =
-                promotionService.listAllPromotions();
+        try {
+            List<Promotion> promotions =
+                    promotionService.listAllPromotions();
 
-        if (promotions.isEmpty()) {
-            System.out.println("No hay promociones registradas.");
-            return;
-        }
+            if (promotions.isEmpty()) {
+                System.out.println("No hay promociones registradas.");
+                return;
+            }
 
-        for (Promotion promotion : promotions) {
-            printPromotion(promotion);
+            for (Promotion promotion : promotions) {
+                printPromotion(promotion);
+            }
+
+        } catch (ResourceNotFoundException e) {
+
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
         }
     }
+
+
 
     /**
      * Displays all currently active promotions.
@@ -527,16 +749,43 @@ public class ConsoleMenu {
 
         System.out.println("\n===== PROMOCIONES ACTIVAS =====");
 
-        List<Promotion> promotions =
-                promotionService.listActivePromotions();
+        try {
+            List<Promotion> promotions =
+                    promotionService.listActivePromotions();
 
-        if (promotions.isEmpty()) {
-            System.out.println("No hay promociones activas.");
-            return;
-        }
+            if (promotions.isEmpty()) {
+                System.out.println("No hay promociones activas.");
+                return;
+            }
 
-        for (Promotion promotion : promotions) {
-            printPromotion(promotion);
+            for (Promotion promotion : promotions) {
+                printPromotion(promotion);
+            }
+
+        } catch (ResourceNotFoundException e) {
+
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
         }
     }
 
@@ -612,10 +861,8 @@ public class ConsoleMenu {
             System.out.println("2. Registrar consola");
             System.out.println("3. Listar productos");
             System.out.println("0. Volver");
-            System.out.print("Seleccione una opción: ");
 
-            option = scanner.nextInt();
-            scanner.nextLine();
+            option = readInt("Seleccione una opción: ");
 
             switch (option) {
 
@@ -658,10 +905,7 @@ public class ConsoleMenu {
             System.out.println("5. Listar accesorios por tipo");
             System.out.println("6. Consultar accesorios compatibles con consola");
             System.out.println("0. Volver");
-            System.out.print("Seleccione una opción: ");
-
-            option = scanner.nextInt();
-            scanner.nextLine();
+            option = readInt("Seleccione una opción: ");
 
             switch (option) {
 
@@ -681,8 +925,7 @@ public class ConsoleMenu {
                     listAllAccessories();
                     break;
 
-                case 5:
-                    listAccessoriesByType();
+                case 5: listAccessoriesByType();
                     break;
 
                 case 6:
@@ -700,6 +943,7 @@ public class ConsoleMenu {
         } while (option != 0);
     }
 
+
     /**
      * Registers a controller using AccessoryService.
      */
@@ -707,44 +951,75 @@ public class ConsoleMenu {
 
         System.out.println("\n===== REGISTRAR CONTROLLER =====");
 
-        System.out.print("ID: ");
-        String id = scanner.nextLine();
+        try {
+            System.out.print("ID: ");
+            String id = scanner.nextLine();
 
-        System.out.print("Título: ");
-        String title = scanner.nextLine();
+            System.out.print("Título: ");
+            String title = scanner.nextLine();
 
-        System.out.print("Precio: ");
-        double price = scanner.nextDouble();
+            double price = readDouble("Precio: ");
+            int stockQuantity = readInt("Cantidad en stock: ");
 
-        System.out.print("Cantidad en stock: ");
-        int stockQuantity = scanner.nextInt();
-        scanner.nextLine();
+            System.out.print("IDs de consolas compatibles separados por coma: ");
+            String compatibleInput = scanner.nextLine();
 
-        System.out.print("IDs de consolas compatibles separados por coma: ");
-        String compatibleInput = scanner.nextLine();
+            List<String> compatibleConsoleIds = new ArrayList<>();
 
-        List<String> compatibleConsoleIds = new ArrayList<>();
+            for (String consoleId : compatibleInput.split(",")) {
+                compatibleConsoleIds.add(consoleId.trim());
+            }
 
-        for (String consoleId : compatibleInput.split(",")) {
-            compatibleConsoleIds.add(consoleId.trim());
+            System.out.print("Tipo de conexión (WIRELESS/WIRED): ");
+            String connectionType = scanner.nextLine();
+
+            Controller controller = new Controller(
+                    id,
+                    title,
+                    price,
+                    stockQuantity,
+                    compatibleConsoleIds,
+                    connectionType
+            );
+
+            accessoryService.registerController(controller);
+
+            System.out.println("Controller registrado correctamente.");
+
+        } catch (ResourceNotFoundException e) {
+
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println(
+                    "No se pudo registrar el controller. "
+                            + "Verifique los datos ingresados."
+            );
         }
-
-        System.out.print("Tipo de conexión (WIRELESS/WIRED): ");
-        String connectionType = scanner.nextLine();
-
-        Controller controller = new Controller(
-                id,
-                title,
-                price,
-                stockQuantity,
-                compatibleConsoleIds,
-                connectionType
-        );
-
-        accessoryService.registerController(controller);
-
-        System.out.println("Controller registrado correctamente.");
     }
+
 
     /**
      * Registers a cable using AccessoryService.
@@ -753,49 +1028,80 @@ public class ConsoleMenu {
 
         System.out.println("\n===== REGISTRAR CABLE =====");
 
-        System.out.print("ID: ");
-        String id = scanner.nextLine();
+        try {
+            System.out.print("ID: ");
+            String id = scanner.nextLine();
 
-        System.out.print("Título: ");
-        String title = scanner.nextLine();
+            System.out.print("Título: ");
+            String title = scanner.nextLine();
 
-        System.out.print("Precio: ");
-        double price = scanner.nextDouble();
+            double price = readDouble("Precio: ");
+            int stockQuantity = readInt("Cantidad en stock: ");
 
-        System.out.print("Cantidad en stock: ");
-        int stockQuantity = scanner.nextInt();
-        scanner.nextLine();
+            System.out.print("IDs de consolas compatibles separados por coma: ");
+            String compatibleInput = scanner.nextLine();
 
-        System.out.print("IDs de consolas compatibles separados por coma: ");
-        String compatibleInput = scanner.nextLine();
+            List<String> compatibleConsoleIds = new ArrayList<>();
 
-        List<String> compatibleConsoleIds = new ArrayList<>();
+            for (String consoleId : compatibleInput.split(",")) {
+                compatibleConsoleIds.add(consoleId.trim());
+            }
 
-        for (String consoleId : compatibleInput.split(",")) {
-            compatibleConsoleIds.add(consoleId.trim());
+            double lengthInMeters =
+                    readDouble("Longitud del cable en metros: ");
+
+            System.out.print("Tipo de conector (HDMI/USB/OPTICAL): ");
+            String connectorType = scanner.nextLine();
+
+            Cable cable = new Cable(
+                    id,
+                    title,
+                    price,
+                    stockQuantity,
+                    compatibleConsoleIds,
+                    lengthInMeters,
+                    connectorType
+            );
+
+            accessoryService.registerCable(cable);
+
+            System.out.println("Cable registrado correctamente.");
+
+        } catch (ResourceNotFoundException e) {
+
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println(
+                    "No se pudo registrar el cable. "
+                            + "Verifique los datos ingresados."
+            );
         }
-
-        System.out.print("Longitud del cable en metros: ");
-        double lengthInMeters = scanner.nextDouble();
-        scanner.nextLine();
-
-        System.out.print("Tipo de conector (HDMI/USB/OPTICAL): ");
-        String connectorType = scanner.nextLine();
-
-        Cable cable = new Cable(
-                id,
-                title,
-                price,
-                stockQuantity,
-                compatibleConsoleIds,
-                lengthInMeters,
-                connectorType
-        );
-
-        accessoryService.registerCable(cable);
-
-        System.out.println("Cable registrado correctamente.");
     }
+
+
 
     /**
      * Registers a memory accessory using AccessoryService.
@@ -804,49 +1110,80 @@ public class ConsoleMenu {
 
         System.out.println("\n===== REGISTRAR MEMORIA =====");
 
-        System.out.print("ID: ");
-        String id = scanner.nextLine();
+        try {
+            System.out.print("ID: ");
+            String id = scanner.nextLine();
 
-        System.out.print("Título: ");
-        String title = scanner.nextLine();
+            System.out.print("Título: ");
+            String title = scanner.nextLine();
 
-        System.out.print("Precio: ");
-        double price = scanner.nextDouble();
+            double price = readDouble("Precio: ");
+            int stockQuantity = readInt("Cantidad en stock: ");
 
-        System.out.print("Cantidad en stock: ");
-        int stockQuantity = scanner.nextInt();
-        scanner.nextLine();
+            System.out.print("IDs de consolas compatibles separados por coma: ");
+            String compatibleInput = scanner.nextLine();
 
-        System.out.print("IDs de consolas compatibles separados por coma: ");
-        String compatibleInput = scanner.nextLine();
+            List<String> compatibleConsoleIds = new ArrayList<>();
 
-        List<String> compatibleConsoleIds = new ArrayList<>();
+            for (String consoleId : compatibleInput.split(",")) {
+                compatibleConsoleIds.add(consoleId.trim());
+            }
 
-        for (String consoleId : compatibleInput.split(",")) {
-            compatibleConsoleIds.add(consoleId.trim());
+            int capacityInGigabytes =
+                    readInt("Capacidad en GB: ");
+
+            System.out.print("Tipo de memoria (SD/MICRO_SD/INTERNAL): ");
+            String memoryType = scanner.nextLine();
+
+            Memory memory = new Memory(
+                    id,
+                    title,
+                    price,
+                    stockQuantity,
+                    compatibleConsoleIds,
+                    capacityInGigabytes,
+                    memoryType
+            );
+
+            accessoryService.registerMemory(memory);
+
+            System.out.println("Memoria registrada correctamente.");
+
+        } catch (ResourceNotFoundException e) {
+
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println(
+                    "No se pudo registrar la memoria. "
+                            + "Verifique los datos ingresados."
+            );
         }
-
-        System.out.print("Capacidad en GB: ");
-        int capacityInGigabytes = scanner.nextInt();
-        scanner.nextLine();
-
-        System.out.print("Tipo de memoria (SD/MICRO_SD/INTERNAL): ");
-        String memoryType = scanner.nextLine();
-
-        Memory memory = new Memory(
-                id,
-                title,
-                price,
-                stockQuantity,
-                compatibleConsoleIds,
-                capacityInGigabytes,
-                memoryType
-        );
-
-        accessoryService.registerMemory(memory);
-
-        System.out.println("Memoria registrada correctamente.");
     }
+
+
 
     /**
      * Displays all registered accessories using AccessoryService.
@@ -855,20 +1192,51 @@ public class ConsoleMenu {
 
         System.out.println("\n===== LISTA DE ACCESORIOS =====");
 
-        if (accessoryService.listAllAccessories().isEmpty()) {
-            System.out.println("No hay accesorios registrados.");
-            return;
-        }
+        try {
+            List<Accessory> accessories =
+                    accessoryService.listAllAccessories();
 
-        for (Accessory accessory : accessoryService.listAllAccessories()) {
+            if (accessories.isEmpty()) {
+                System.out.println("No hay accesorios registrados.");
+                return;
+            }
+
+            for (Accessory accessory : accessories) {
+                System.out.println(
+                        "ID: " + accessory.getId()
+                                + " | " + accessory.getDescription()
+                                + " | Precio: " + accessory.getPrice()
+                                + " | Stock: " + accessory.getStockQuantity()
+                );
+            }
+
+        } catch (ResourceNotFoundException e) {
+
             System.out.println(
-                    "ID: " + accessory.getId()
-                            + " | " + accessory.getDescription()
-                            + " | Precio: " + accessory.getPrice()
-                            + " | Stock: " + accessory.getStockQuantity()
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
             );
         }
     }
+
 
     /**
      * Displays accessories filtered by type.
@@ -881,23 +1249,55 @@ public class ConsoleMenu {
 
         String type = scanner.nextLine().trim();
 
-        List<Accessory> accessories =
-                accessoryService.listAccessoriesByType(type);
-
-        if (accessories.isEmpty()) {
-            System.out.println("No se encontraron accesorios de ese tipo.");
+        if (type.isEmpty()) {
+            System.out.println("El tipo de accesorio no puede estar vacío.");
             return;
         }
 
-        for (Accessory accessory : accessories) {
+        try {
+            List<Accessory> accessories =
+                    accessoryService.listAccessoriesByType(type);
+
+            if (accessories.isEmpty()) {
+                System.out.println(
+                        "No se encontraron accesorios de ese tipo."
+                );
+                return;
+            }
+
+            for (Accessory accessory : accessories) {
+                System.out.println(
+                        "ID: " + accessory.getId()
+                                + " | " + accessory.getDescription()
+                                + " | Precio: " + accessory.getPrice()
+                                + " | Stock: " + accessory.getStockQuantity()
+                );
+            }
+
+        } catch (ResourceNotFoundException e) {
             System.out.println(
-                    "ID: " + accessory.getId()
-                            + " | " + accessory.getDescription()
-                            + " | Precio: " + accessory.getPrice()
-                            + " | Stock: " + accessory.getStockQuantity()
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
             );
         }
     }
+
+
 
     /**
      * Displays accessories compatible with a selected console.
@@ -909,29 +1309,58 @@ public class ConsoleMenu {
         System.out.print("Ingrese el ID de la consola: ");
         String consoleId = scanner.nextLine().trim();
 
-        List<Accessory> accessories =
-                accessoryService.findAccessoriesCompatibleWith(consoleId);
-
-        if (accessories.isEmpty()) {
-            System.out.println(
-                    "No se encontraron accesorios compatibles con la consola."
-            );
+        if (consoleId.isEmpty()) {
+            System.out.println("El ID de la consola no puede estar vacío.");
             return;
         }
 
-        System.out.println(
-                "Accesorios compatibles con la consola " + consoleId + ":"
-        );
+        try {
+            List<Accessory> accessories =
+                    accessoryService.findAccessoriesCompatibleWith(consoleId);
 
-        for (Accessory accessory : accessories) {
+            if (accessories.isEmpty()) {
+                System.out.println(
+                        "No se encontraron accesorios compatibles con la consola."
+                );
+                return;
+            }
+
             System.out.println(
-                    "ID: " + accessory.getId()
-                            + " | " + accessory.getDescription()
-                            + " | Precio: " + accessory.getPrice()
-                            + " | Stock: " + accessory.getStockQuantity()
+                    "Accesorios compatibles con la consola " + consoleId + ":"
+            );
+
+            for (Accessory accessory : accessories) {
+                System.out.println(
+                        "ID: " + accessory.getId()
+                                + " | " + accessory.getDescription()
+                                + " | Precio: " + accessory.getPrice()
+                                + " | Stock: " + accessory.getStockQuantity()
+                );
+            }
+
+        } catch (ResourceNotFoundException e) {
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
             );
         }
     }
+
 
     /**
      * Registers a video game using ProductService.
@@ -940,42 +1369,73 @@ public class ConsoleMenu {
 
         System.out.println("\n===== REGISTRAR VIDEOJUEGO =====");
 
-        System.out.print("ID: ");
-        String id = scanner.nextLine();
+        try {
+            System.out.print("ID: ");
+            String id = scanner.nextLine();
 
-        System.out.print("Título: ");
-        String title = scanner.nextLine();
+            System.out.print("Título: ");
+            String title = scanner.nextLine();
 
-        System.out.print("Precio: ");
-        double price = scanner.nextDouble();
+            double price = readDouble("Precio: ");
+            int stockQuantity = readInt("Cantidad en stock: ");
 
-        System.out.print("Cantidad en stock: ");
-        int stockQuantity = scanner.nextInt();
-        scanner.nextLine();
+            System.out.print("Plataforma: ");
+            String platform = scanner.nextLine();
 
-        System.out.print("Plataforma: ");
-        String platform = scanner.nextLine();
+            System.out.print("Género: ");
+            String genre = scanner.nextLine();
 
-        System.out.print("Género: ");
-        String genre = scanner.nextLine();
+            System.out.print("Clasificación por edad: ");
+            String ageClassification = scanner.nextLine();
 
-        System.out.print("Clasificación por edad: ");
-        String ageClassification = scanner.nextLine();
+            VideoGame videoGame = new VideoGame(
+                    id,
+                    title,
+                    price,
+                    stockQuantity,
+                    platform,
+                    genre,
+                    ageClassification
+            );
 
-        VideoGame videoGame = new VideoGame(
-                id,
-                title,
-                price,
-                stockQuantity,
-                platform,
-                genre,
-                ageClassification
-        );
+            productService.registerProduct(videoGame);
 
-        productService.registerProduct(videoGame);
+            System.out.println("Videojuego registrado correctamente.");
 
-        System.out.println("Videojuego registrado correctamente.");
+        } catch (ResourceNotFoundException e) {
+
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println(
+                    "No se pudo registrar el videojuego. "
+                            + "Verifique los datos ingresados."
+            );
+        }
     }
+
 
     /**
      * Registers a console using ProductService.
@@ -984,42 +1444,73 @@ public class ConsoleMenu {
 
         System.out.println("\n===== REGISTRAR CONSOLA =====");
 
-        System.out.print("ID: ");
-        String id = scanner.nextLine();
+        try {
+            System.out.print("ID: ");
+            String id = scanner.nextLine();
 
-        System.out.print("Título: ");
-        String title = scanner.nextLine();
+            System.out.print("Título: ");
+            String title = scanner.nextLine();
 
-        System.out.print("Precio: ");
-        double price = scanner.nextDouble();
+            double price = readDouble("Precio: ");
+            int stockQuantity = readInt("Cantidad en stock: ");
 
-        System.out.print("Cantidad en stock: ");
-        int stockQuantity = scanner.nextInt();
-        scanner.nextLine();
+            System.out.print("Marca: ");
+            String brand = scanner.nextLine();
 
-        System.out.print("Marca: ");
-        String brand = scanner.nextLine();
+            System.out.print("Modelo: ");
+            String model = scanner.nextLine();
 
-        System.out.print("Modelo: ");
-        String model = scanner.nextLine();
+            System.out.print("Generación: ");
+            String generation = scanner.nextLine();
 
-        System.out.print("Generación: ");
-        String generation = scanner.nextLine();
+            Console console = new Console(
+                    id,
+                    title,
+                    price,
+                    stockQuantity,
+                    brand,
+                    model,
+                    generation
+            );
 
-        Console console = new Console(
-                id,
-                title,
-                price,
-                stockQuantity,
-                brand,
-                model,
-                generation
-        );
+            productService.registerProduct(console);
 
-        productService.registerProduct(console);
+            System.out.println("Consola registrada correctamente.");
 
-        System.out.println("Consola registrada correctamente.");
+        } catch (ResourceNotFoundException e) {
+
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println(
+                    "No se pudo registrar la consola. "
+                            + "Verifique los datos ingresados."
+            );
+        }
     }
+
 
     /**
      * Displays all products using ProductService.
@@ -1028,22 +1519,46 @@ public class ConsoleMenu {
 
         System.out.println("\n===== LISTA DE PRODUCTOS =====");
 
-        if (productService.getAllProducts().isEmpty()) {
+        try {
+            List<Product> products = productService.getAllProducts();
 
-            System.out.println("No hay productos registrados.");
+            if (products.isEmpty()) {
+                System.out.println("No hay productos registrados.");
+                return;
+            }
 
-            return;
-        }
+            for (Product product : products) {
+                System.out.println(
+                        "ID: " + product.getId()
+                                + " | " + product.getDescription()
+                                + " | Stock: " + product.getStockQuantity()
+                );
+            }
 
-        for (Product product : productService.getAllProducts()) {
-
+        } catch (ResourceNotFoundException e) {
             System.out.println(
-                    "ID: " + product.getId()
-                            + " | " + product.getDescription()
-                            + " | Stock: " + product.getStockQuantity()
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
             );
         }
     }
+
+
 
     /**
      * Displays the person management submenu.
@@ -1058,10 +1573,7 @@ public class ConsoleMenu {
             System.out.println("2. Listar clientes");
             System.out.println("3. Listar vendedores");
             System.out.println("0. Volver");
-            System.out.print("Seleccione una opción: ");
-
-            option = scanner.nextInt();
-            scanner.nextLine();
+            option = readInt("Seleccione una opción: ");
 
             switch (option) {
 
@@ -1088,6 +1600,7 @@ public class ConsoleMenu {
         } while (option != 0);
     }
 
+
     /**
      * Registers a customer using PersonService.
      */
@@ -1095,29 +1608,64 @@ public class ConsoleMenu {
 
         System.out.println("\n===== REGISTRAR CLIENTE =====");
 
-        System.out.print("ID: ");
-        String id = scanner.nextLine();
+        try {
+            System.out.print("ID: ");
+            String id = scanner.nextLine();
 
-        System.out.print("Nombre: ");
-        String name = scanner.nextLine();
+            System.out.print("Nombre: ");
+            String name = scanner.nextLine();
 
-        System.out.print("Teléfono: ");
-        String phone = scanner.nextLine();
+            System.out.print("Teléfono: ");
+            String phone = scanner.nextLine();
 
-        System.out.print("Correo electrónico: ");
-        String email = scanner.nextLine();
+            System.out.print("Correo electrónico: ");
+            String email = scanner.nextLine();
 
-        Customer customer = new Customer(
-                id,
-                name,
-                phone,
-                email
-        );
+            Customer customer = new Customer(
+                    id,
+                    name,
+                    phone,
+                    email
+            );
 
-        personService.registerCustomer(customer);
+            personService.registerCustomer(customer);
 
-        System.out.println("Cliente registrado correctamente.");
+            System.out.println("Cliente registrado correctamente.");
+
+        } catch (ResourceNotFoundException e) {
+
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println(
+                    "No se pudo registrar el cliente. "
+                            + "Verifique los datos ingresados."
+            );
+        }
     }
+
 
     /**
      * Displays all customers using PersonService.
@@ -1126,22 +1674,46 @@ public class ConsoleMenu {
 
         System.out.println("\n===== LISTA DE CLIENTES =====");
 
-        if (personService.getAllCustomers().isEmpty()) {
+        try {
+            List<Customer> customers = personService.getAllCustomers();
 
-            System.out.println("No hay clientes registrados.");
+            if (customers.isEmpty()) {
+                System.out.println("No hay clientes registrados.");
+                return;
+            }
 
-            return;
+            customers.forEach(customer ->
+                    System.out.println(
+                            "ID: " + customer.getId()
+                                    + " | Nombre: " + customer.getName()
+                                    + " | Teléfono: " + customer.getPhone()
+                                    + " | Email: " + customer.getEmail()
+                    )
+            );
+
+        } catch (ResourceNotFoundException e) {
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
         }
-
-        personService.getAllCustomers().forEach(customer ->
-                System.out.println(
-                        "ID: " + customer.getId()
-                                + " | Nombre: " + customer.getName()
-                                + " | Teléfono: " + customer.getPhone()
-                                + " | Email: " + customer.getEmail()
-                )
-        );
     }
+
 
     /**
      * Displays all sellers using PersonService.
@@ -1150,23 +1722,46 @@ public class ConsoleMenu {
 
         System.out.println("\n===== LISTA DE VENDEDORES =====");
 
-        if (personService.getAllSellers().isEmpty()) {
+        try {
+            List<Seller> sellers = personService.getAllSellers();
 
-            System.out.println("No hay vendedores registrados.");
+            if (sellers.isEmpty()) {
+                System.out.println("No hay vendedores registrados.");
+                return;
+            }
 
-            return;
+            sellers.forEach(seller -> System.out.println(
+                    "ID: " + seller.getId()
+                            + " | Nombre: " + seller.getName()
+                            + " | Teléfono: " + seller.getPhone()
+                            + " | Código: " + seller.getCodeEmployee()
+                            + " | Turno: " + seller.getShift()
+            ));
+
+        } catch (ResourceNotFoundException e) {
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
         }
-
-        personService.getAllSellers().forEach(seller ->
-                System.out.println(
-                        "ID: " + seller.getId()
-                                + " | Nombre: " + seller.getName()
-                                + " | Teléfono: " + seller.getPhone()
-                                + " | Código: " + seller.getCodeEmployee()
-                                + " | Turno: " + seller.getShift()
-                )
-        );
     }
+
+
 
     /**
      * Displays the sale management submenu.
@@ -1182,10 +1777,7 @@ public class ConsoleMenu {
             System.out.println("3. Historial de compras del cliente");
             System.out.println("4. Historial de ventas del vendedor");
             System.out.println("0. Volver");
-            System.out.print("Seleccione una opción: ");
-
-            option = scanner.nextInt();
-            scanner.nextLine();
+            option = readInt("Seleccione una opción: ");
 
             switch (option) {
 
@@ -1320,10 +1912,9 @@ public class ConsoleMenu {
             System.out.println("1. Agregar producto");
             System.out.println("2. Agregar accesorio");
             System.out.println("0. Finalizar venta");
-            System.out.print("Seleccione una opción: ");
 
-            option = scanner.nextInt();
-            scanner.nextLine();
+            option = readInt("Seleccione una opción: ");
+
 
             switch (option) {
 
@@ -1487,10 +2078,39 @@ public class ConsoleMenu {
         } catch (IllegalArgumentException e) {
 
             System.out.println(
-                    "No se pudo registrar la venta: " + e.getMessage()
+                    "No se pudo registrar la venta. Verifique los datos ingresados."
             );
+
+        } catch (ResourceNotFoundException e) {
+
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+
+        } catch (PersistenceException e) {
+
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+
+
         }
     }
+
 
     /**
      * Displays all registered sales using SaleService.
@@ -1499,52 +2119,75 @@ public class ConsoleMenu {
 
         System.out.println("\n===== LISTA DE VENTAS =====");
 
-        if (saleService.findAll().isEmpty()) {
+        try {
+            List<Sale> sales = saleService.findAll();
 
-            System.out.println("No hay ventas registradas.");
-
-            return;
-        }
-
-        saleService.findAll().forEach(sale -> {
-
-            double subtotal = sale.calculateTotal();
-            double discount = sale.getDiscountAmount();
-            double warrantyCost = sale.getWarrantyAdditionalCost();
-            double finalTotal = subtotal - discount + warrantyCost;
-
-            System.out.println(
-                    "\nID Venta: " + sale.getSaleId()
-                            + " | Fecha: " + sale.getDate()
-                            + " | Cliente: " + sale.getCustomer().getName()
-                            + " | Vendedor: " + sale.getSeller().getName()
-            );
-
-            System.out.println("Subtotal: $" + subtotal);
-
-            if (sale.getAppliedPromotionName() != null
-                    && !sale.getAppliedPromotionName().isBlank()) {
-
-                System.out.println(
-                        "Promoción aplicada: "
-                                + sale.getAppliedPromotionName()
-                );
-
-                System.out.println("Descuento: $" + discount);
-
-            } else {
-
-                System.out.println("Promoción aplicada: Ninguna");
-                System.out.println("Descuento: $0.0");
+            if (sales.isEmpty()) {
+                System.out.println("No hay ventas registradas.");
+                return;
             }
 
+            sales.forEach(sale -> {
+
+                double subtotal = sale.calculateTotal();
+                double discount = sale.getDiscountAmount();
+                double warrantyCost = sale.getWarrantyAdditionalCost();
+                double finalTotal = subtotal - discount + warrantyCost;
+
+                System.out.println(
+                        "\nID Venta: " + sale.getSaleId()
+                                + " | Fecha: " + sale.getDate()
+                                + " | Cliente: " + sale.getCustomer().getName()
+                                + " | Vendedor: " + sale.getSeller().getName()
+                );
+
+                System.out.println("Subtotal: $" + subtotal);
+
+                if (sale.getAppliedPromotionName() != null
+                        && !sale.getAppliedPromotionName().isBlank()) {
+
+                    System.out.println(
+                            "Promoción aplicada: "
+                                    + sale.getAppliedPromotionName()
+                    );
+
+                    System.out.println("Descuento: $" + discount);
+
+                } else {
+                    System.out.println("Promoción aplicada: Ninguna");
+                    System.out.println("Descuento: $0.0");
+                }
+
+                System.out.println(
+                        "Garantía extendida: $" + warrantyCost
+                );
+
+                System.out.println("Total final: $" + finalTotal);
+            });
+
+        } catch (ResourceNotFoundException e) {
             System.out.println(
-                    "Garantía extendida: $" + warrantyCost
+                    "No se encontró el recurso solicitado: " + e.getMessage()
             );
 
-            System.out.println("Total final: $" + finalTotal);
-        });
+        } catch (InvalidDataException e) {
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+        }
     }
+
 
     /**
      * Displays the return management submenu.
@@ -1561,10 +2204,8 @@ public class ConsoleMenu {
             System.out.println("4. Buscar devoluciones por venta");
             System.out.println("5. Balance mensual");
             System.out.println("0. Volver");
-            System.out.print("Seleccione una opción: ");
 
-            option = scanner.nextInt();
-            scanner.nextLine();
+            option = readInt("Seleccione una opción: ");
 
             switch (option) {
 
@@ -1599,6 +2240,7 @@ public class ConsoleMenu {
         } while (option != 0);
     }
 
+
     /**
      * Registers a product return.
      */
@@ -1606,56 +2248,78 @@ public class ConsoleMenu {
 
         System.out.println("\n===== REGISTRAR DEVOLUCIÓN =====");
 
-        System.out.print("ID de la venta: ");
-        String saleId = scanner.nextLine();
-
-        Sale sale = null;
-
-        for (Sale s : saleService.findAll()) {
-            if (s.getSaleId().equals(saleId)) {
-                sale = s;
-                break;
-            }
-        }
-
-        if (sale == null) {
-            System.out.println("Venta no encontrada.");
-            return;
-        }
-
-        System.out.println("\n===== PRODUCTOS DE LA VENTA =====");
-
-        for (Product product : sale.getProducts()) {
-            System.out.println(
-                    "ID: " + product.getId()
-                            + " | " + product.getDescription()
-                            + " | Precio: " + product.getPrice()
-            );
-        }
-
-        System.out.print(
-                "Ingrese los IDs de los productos a devolver separados por coma: "
-        );
-
-        String input = scanner.nextLine();
-
-        List<String> productIds = new ArrayList<>();
-
-        for (String productId : input.split(",")) {
-            productIds.add(productId.trim());
-        }
-
-        System.out.print("Motivo de la devolución: ");
-        String reason = scanner.nextLine();
-
         try {
+            System.out.print("ID de la venta: ");
+            String saleId = scanner.nextLine().trim();
 
-            Return newReturn =
-                    returnService.registerReturn(
-                            saleId,
-                            productIds,
-                            reason
+            if (saleId.isEmpty()) {
+                System.out.println("El ID de la venta no puede estar vacío.");
+                return;
+            }
+
+            Sale sale = null;
+
+            for (Sale s : saleService.findAll()) {
+                if (s.getSaleId().equals(saleId)) {
+                    sale = s;
+                    break;
+                }
+            }
+
+            if (sale == null) {
+                System.out.println("Venta no encontrada.");
+                return;
+            }
+
+            System.out.println("\n===== PRODUCTOS DE LA VENTA =====");
+
+            for (Product product : sale.getProducts()) {
+                System.out.println(
+                        "ID: " + product.getId()
+                                + " | " + product.getDescription()
+                                + " | Precio: " + product.getPrice()
+                );
+            }
+
+            System.out.print(
+                    "Ingrese los IDs de los productos a devolver separados por coma: "
+            );
+
+            String input = scanner.nextLine();
+
+            if (input.isBlank()) {
+                System.out.println("Debe ingresar al menos un producto.");
+                return;
+            }
+
+            List<String> productIds = new ArrayList<>();
+
+            for (String productId : input.split(",")) {
+                String id = productId.trim();
+
+                if (id.isEmpty()) {
+                    System.out.println(
+                            "La lista contiene un ID de producto vacío."
                     );
+                    return;
+                }
+
+                productIds.add(id);
+            }
+
+            System.out.print("Motivo de la devolución: ");
+            String reason = scanner.nextLine().trim();
+
+            if (reason.isEmpty()) {
+                System.out.println("El motivo de la devolución es obligatorio.");
+                return;
+            }
+
+            Return newReturn = returnService.registerReturn(
+                    saleId,
+                    productIds,
+                    reason
+            );
 
             System.out.println("\nDevolución registrada correctamente.");
             System.out.println("ID de devolución: " + newReturn.getReturnId());
@@ -1664,14 +2328,35 @@ public class ConsoleMenu {
                     "Valor reembolsado: " + newReturn.getRefundAmount()
             );
 
-        } catch (IllegalArgumentException e) {
-
+        } catch (ResourceNotFoundException e) {
             System.out.println(
-                    "No se pudo registrar la devolución: "
-                            + e.getMessage()
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+
+        } catch (IllegalArgumentException e) {
+            System.out.println(
+                    "No se pudo registrar la devolución. "
+                            + "Verifique los datos ingresados."
             );
         }
     }
+
 
     /**
      * Displays all registered returns.
@@ -1680,23 +2365,49 @@ public class ConsoleMenu {
 
         System.out.println("\n===== LISTA DE DEVOLUCIONES =====");
 
-        if (returnService.viewAllReturns().isEmpty()) {
-            System.out.println("No hay devoluciones registradas.");
-            return;
-        }
+        try {
+            List<Return> returns = returnService.viewAllReturns();
 
-        returnService.viewAllReturns().forEach(returnItem ->
-                System.out.println(
-                        "ID: " + returnItem.getReturnId()
-                                + " | Fecha: " + returnItem.getReturnDate()
-                                + " | Venta: "
-                                + returnItem.getOriginalSale().getSaleId()
-                                + " | Motivo: " + returnItem.getReason()
-                                + " | Reembolso: "
-                                + returnItem.getRefundAmount()
-                )
-        );
+            if (returns.isEmpty()) {
+                System.out.println("No hay devoluciones registradas.");
+                return;
+            }
+
+            returns.forEach(returnItem ->
+                    System.out.println(
+                            "ID: " + returnItem.getReturnId()
+                                    + " | Fecha: " + returnItem.getReturnDate()
+                                    + " | Venta: "
+                                    + returnItem.getOriginalSale().getSaleId()
+                                    + " | Motivo: " + returnItem.getReason()
+                                    + " | Reembolso: "
+                                    + returnItem.getRefundAmount()
+                    )
+            );
+
+        } catch (ResourceNotFoundException e) {
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+        }
     }
+
 
     /**
      * Displays returns registered for a specific customer.
@@ -1706,31 +2417,59 @@ public class ConsoleMenu {
         System.out.println("\n===== DEVOLUCIONES POR CLIENTE =====");
 
         System.out.print("ID del cliente: ");
-        String customerId = scanner.nextLine();
+        String customerId = scanner.nextLine().trim();
 
-        List<com.gamezone.model.Return> results =
-                returnService.viewReturnsByCustomer(customerId);
-
-        if (results.isEmpty()) {
-            System.out.println(
-                    "No hay devoluciones registradas para ese cliente."
-            );
+        if (customerId.isEmpty()) {
+            System.out.println("El ID del cliente no puede estar vacío.");
             return;
         }
 
-        for (com.gamezone.model.Return returnItem : results) {
+        try {
+            List<com.gamezone.model.Return> results =
+                    returnService.viewReturnsByCustomer(customerId);
 
+            if (results.isEmpty()) {
+                System.out.println(
+                        "No hay devoluciones registradas para ese cliente."
+                );
+                return;
+            }
+
+            for (com.gamezone.model.Return returnItem : results) {
+                System.out.println(
+                        "ID: " + returnItem.getReturnId()
+                                + " | Fecha: " + returnItem.getReturnDate()
+                                + " | Venta: "
+                                + returnItem.getOriginalSale().getSaleId()
+                                + " | Motivo: " + returnItem.getReason()
+                                + " | Reembolso: " + returnItem.getRefundAmount()
+                );
+            }
+
+        } catch (ResourceNotFoundException e) {
             System.out.println(
-                    "ID: " + returnItem.getReturnId()
-                            + " | Fecha: " + returnItem.getReturnDate()
-                            + " | Venta: "
-                            + returnItem.getOriginalSale().getSaleId()
-                            + " | Motivo: " + returnItem.getReason()
-                            + " | Reembolso: "
-                            + returnItem.getRefundAmount()
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
             );
         }
     }
+
+
 
     /**
      * Displays returns registered for a specific sale.
@@ -1740,31 +2479,58 @@ public class ConsoleMenu {
         System.out.println("\n===== DEVOLUCIONES POR VENTA =====");
 
         System.out.print("ID de la venta: ");
-        String saleId = scanner.nextLine();
+        String saleId = scanner.nextLine().trim();
 
-        List<com.gamezone.model.Return> results =
-                returnService.viewReturnsBySale(saleId);
-
-        if (results.isEmpty()) {
-            System.out.println(
-                    "No hay devoluciones registradas para esa venta."
-            );
+        if (saleId.isEmpty()) {
+            System.out.println("El ID de la venta no puede estar vacío.");
             return;
         }
 
-        for (com.gamezone.model.Return returnItem : results) {
+        try {
+            List<com.gamezone.model.Return> results =
+                    returnService.viewReturnsBySale(saleId);
 
+            if (results.isEmpty()) {
+                System.out.println(
+                        "No hay devoluciones registradas para esa venta."
+                );
+                return;
+            }
+
+            for (com.gamezone.model.Return returnItem : results) {
+                System.out.println(
+                        "ID: " + returnItem.getReturnId()
+                                + " | Fecha: " + returnItem.getReturnDate()
+                                + " | Venta: "
+                                + returnItem.getOriginalSale().getSaleId()
+                                + " | Motivo: " + returnItem.getReason()
+                                + " | Reembolso: " + returnItem.getRefundAmount()
+                );
+            }
+
+        } catch (ResourceNotFoundException e) {
             System.out.println(
-                    "ID: " + returnItem.getReturnId()
-                            + " | Fecha: " + returnItem.getReturnDate()
-                            + " | Venta: "
-                            + returnItem.getOriginalSale().getSaleId()
-                            + " | Motivo: " + returnItem.getReason()
-                            + " | Reembolso: "
-                            + returnItem.getRefundAmount()
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
             );
         }
     }
+
 
     /**
      * Displays the monthly balance of sales and returns.
@@ -1773,38 +2539,146 @@ public class ConsoleMenu {
 
         System.out.println("\n===== BALANCE MENSUAL =====");
 
-        System.out.print("Ingrese el mes (1-12): ");
-        int month = scanner.nextInt();
-
-        System.out.print("Ingrese el año: ");
-        int year = scanner.nextInt();
-        scanner.nextLine();
+        int month = readInt("Ingrese el mes (1-12): ");
 
         if (month < 1 || month > 12) {
             System.out.println("El mes debe estar entre 1 y 12.");
             return;
         }
 
-        double sales =
-                returnService.calculateMonthlySales(month, year);
+        int year = readInt("Ingrese el año: ");
 
-        double returns =
-                returnService.calculateMonthlyReturns(month, year);
+        if (year < 1) {
+            System.out.println("El año debe ser mayor que cero.");
+            return;
+        }
 
-        double balance =
-                returnService.generateMonthlyBalance(month, year);
+        try {
+            double sales =
+                    returnService.calculateMonthlySales(month, year);
 
-        System.out.println(
-                "Total de ventas del mes " + month + "/" + year + ": $" + sales
-        );
+            double returns =
+                    returnService.calculateMonthlyReturns(month, year);
 
-        System.out.println(
-                "Total de devoluciones del mes " + month + "/" + year + ": $" + returns
-        );
+            double balance =
+                    returnService.generateMonthlyBalance(month, year);
 
-        System.out.println(
-                "Balance del mes " + month + "/" + year + ": $" + balance
-        );
+            System.out.println(
+                    "Total de ventas del mes " + month + "/" + year
+                            + ": $" + sales
+            );
+
+            System.out.println(
+                    "Total de devoluciones del mes " + month + "/" + year
+                            + ": $" + returns
+            );
+
+            System.out.println(
+                    "Balance del mes " + month + "/" + year
+                            + ": $" + balance
+            );
+
+        } catch (ResourceNotFoundException e) {
+            System.out.println(
+                    "No se encontró el recurso solicitado: " + e.getMessage()
+            );
+
+        } catch (InvalidDataException e) {
+            System.out.println(
+                    "Los datos ingresados no son válidos: " + e.getMessage()
+            );
+
+        } catch (BusinessRuleException e) {
+            System.out.println(
+                    "No se puede completar la operación: " + e.getMessage()
+            );
+
+        } catch (PersistenceException e) {
+            System.out.println(
+                    "Ocurrió un problema al acceder a los datos del sistema. "
+                            + "Contacte al administrador."
+            );
+        }
     }
+
+
+
+    /**
+     * Reads an integer and handles invalid input.
+     *
+     * @param message message displayed to the user
+     * @return valid integer entered by the user
+     */
+    private int readInt(String message) {
+
+        while (true) {
+            System.out.print(message);
+            String input = scanner.nextLine().trim();
+
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println(
+                        "Entrada inválida. Ingrese un número entero."
+                );
+            }
+        }
+    }
+
+    /**
+     * Reads a decimal number and handles invalid input.
+     *
+     * @param message message displayed to the user
+     * @return valid decimal number entered by the user
+     */
+    private double readDouble(String message) {
+
+        while (true) {
+            System.out.print(message);
+            String input = scanner.nextLine().trim().replace(',', '.');
+
+            try {
+                double value = Double.parseDouble(input);
+
+                if (Double.isFinite(value)) {
+                    return value;
+                }
+
+                System.out.println(
+                        "El número debe ser un valor finito."
+                );
+
+            } catch (NumberFormatException e) {
+                System.out.println(
+                        "Entrada inválida. Ingrese un número decimal."
+                );
+            }
+        }
+    }
+
+
+    /**
+     * Reads a date in ISO format (YYYY-MM-DD).
+     *
+     * @param message message displayed to the user
+     * @return valid date entered by the user
+     */
+    private LocalDate readDate(String message) {
+
+        while (true) {
+            System.out.print(message);
+            String input = scanner.nextLine().trim();
+
+            try {
+                return LocalDate.parse(input);
+            } catch (DateTimeParseException e) {
+                System.out.println(
+                        "Fecha inválida. Use el formato YYYY-MM-DD "
+                                + "y verifique que la fecha exista."
+                );
+            }
+        }
+    }
+
 
 }
