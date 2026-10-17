@@ -1,5 +1,5 @@
 package com.gamezone.service;
-
+import com.gamezone.validation.ProductValidator;
 import com.gamezone.model.Product;
 import com.gamezone.persistence.ProductRepository;
 import java.util.List;
@@ -69,17 +69,9 @@ public class ProductService {
     public void updateStock(String productId, int quantity) {
         Product product = findById(productId);
 
-        if (product == null) {
-            throw new IllegalArgumentException("Product not found");
-        }
-
-        if (quantity < 0) {
-            throw new IllegalArgumentException("Quantity cannot be negative");
-        }
-
-        if (product.getStockQuantity() < quantity) {
-            throw new IllegalArgumentException("Insufficient stock");
-        }
+        ProductValidator.validateProductExists(product, productId);
+        ProductValidator.validateQuantity(quantity);
+        ProductValidator.validateStockAvailability(product, quantity);
 
         product.setStockQuantity(product.getStockQuantity() - quantity);
 
@@ -87,25 +79,18 @@ public class ProductService {
     }
 
     /**
-     * Restores a specified quantity of stock to a product and persists
-     * the updated product list.
+     * Restores a specified quantity of stock to a product.
      *
-     * @param productId The unique identifier of the product.
-     * @param quantity The number of units to restore.
-     * @throws IllegalArgumentException If the product does not exist
-     *                                  or the quantity is not positive.
+     * @param productId the product identifier
+     * @param quantity  the units to restore
+     * @throws com.gamezone.exceptions.ResourceNotFoundException if the product does not exist
+     * @throws com.gamezone.exceptions.InvalidDataException if the quantity is not positive
      */
     public void restoreStock(String productId, int quantity) {
         Product product = findById(productId);
 
-        if (product == null) {
-            throw new IllegalArgumentException("Product not found");
-        }
-
-        if (quantity <= 0) {
-            throw new IllegalArgumentException(
-                    "Quantity to restore must be greater than zero");
-        }
+        ProductValidator.validateProductExists(product, productId);
+        ProductValidator.validatePositiveQuantity(quantity);
 
         product.setStockQuantity(product.getStockQuantity() + quantity);
 
