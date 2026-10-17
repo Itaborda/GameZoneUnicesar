@@ -1,5 +1,5 @@
 package com.gamezone.persistence;
-
+import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Customer;
 import com.gamezone.model.Person;
 import com.gamezone.model.Seller;
@@ -36,7 +36,7 @@ public class PersonRepository {
      * previous content. Each line represents one person, with the
      * columns depending on whether the person is a customer or a
      * seller.
-     *
+     *@throws PersistenceException if the file be written
      * @param person the list of people to save
      */
     public void save (List<Person> person){
@@ -71,14 +71,15 @@ public class PersonRepository {
 
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new PersistenceException(
+                    "Failed to write products to file '" + filePath + "' (operation: write)", e);
         }
     }
     /**
      * Loads all people stored in the file and reconstructs them as
      * {@link Customer} or {@link Seller} objects based on the role
      * column of each line.
-     *
+     * @throws PersistenceException if the file be read
      * @return the list of people loaded from the file
      */
     public List<Person> findAll(){
@@ -109,7 +110,8 @@ public class PersonRepository {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new PersistenceException(
+                    "Failed to read products from file '" + filePath + "' (operation: read)", e);
         }
 
         return person;
