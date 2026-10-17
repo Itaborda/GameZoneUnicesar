@@ -72,7 +72,7 @@ public class PersonRepository {
             }
         } catch (IOException e) {
             throw new PersistenceException(
-                    "Failed to write products to file '" + filePath + "' (operation: write)", e);
+                    "Failed to write people to file '" + filePath + "' (operation: write)", e);
         }
     }
     /**
@@ -111,7 +111,7 @@ public class PersonRepository {
 
         } catch (IOException e) {
             throw new PersistenceException(
-                    "Failed to read products from file '" + filePath + "' (operation: read)", e);
+                    "Failed to read people from file '" + filePath + "' (operation: read)", e);
         }
 
         return person;
