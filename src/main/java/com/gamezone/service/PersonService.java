@@ -1,10 +1,13 @@
 package com.gamezone.service;
 
+import com.gamezone.exceptions.BusinessRuleException;
+import com.gamezone.exceptions.InvalidDataException;
 import com.gamezone.model.Customer;
 import com.gamezone.model.Person;
 import com.gamezone.model.Seller;
 import com.gamezone.persistence.PersonRepository;
 import com.gamezone.persistence.ProductRepository;
+import com.gamezone.validation.PersonValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +37,12 @@ public class PersonService {
      * persisting the updated list to the repository.
      *
      * @param c the customer to register
+     * @throws InvalidDataException
+     * @throws BusinessRuleException
      */
     public void registerCustomer(Customer c){
+        PersonValidator.validatePersonData(c.getId(), c.getName(), c.getEmail(), c.getPhone());
+        PersonValidator.validateUniquePerson(person, c.getId());
         person.add(c);
         personRepository.save(person);
     }
