@@ -1,5 +1,5 @@
 package com.gamezone.persistence;
-
+import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Product;
 import com.gamezone.model.VideoGame;
 import com.gamezone.model.Console;
@@ -42,6 +42,7 @@ public class ProductRepository {
      * video game or a console.
      *
      * @param products the list of products to save
+     * @throws PersistenceException if the file cannot be written
      */
     public void saveAll(List<Product> products) {
         File file = new File(filePath); File parent = file.getParentFile();
@@ -83,7 +84,8 @@ public class ProductRepository {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new PersistenceException(
+                    "Failed to write products to file '" + filePath + "' (operation: write)", e);
         }
     }
 
@@ -95,6 +97,7 @@ public class ProductRepository {
      * object using the stored data.
      *
      * @return a list containing all products found in the file
+     * @throws PersistenceException if the file be read
      */
     public List<Product> findAll() {
         List<Product> products = new ArrayList<>();
@@ -144,7 +147,8 @@ public class ProductRepository {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new PersistenceException(
+                    "Failed to read products from file '" + filePath + "' (operation: read)", e);
         }
 
         return products;

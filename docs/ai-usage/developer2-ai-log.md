@@ -135,3 +135,42 @@ ChatGPT
 - Asked Claude for commit message wording for the feature/ branch.
 
 **Decision taken:** I applied the cancelWarranties method as proposed, updated Return and ReturnService accordingly, and updated Main.java to pass WarrantyService into ReturnService's constructor, keeping WarrantyService's construction before ReturnService's as required by the existing dependency order.
+
+## Entry 14 - R6 step-by-step guide
+
+**Question:** I asked for a summary of my responsibilities in R6 
+**Use of AI:** I received an explanation of the task.
+**What I did myself:** I read the existing code and adapted the snippets to
+my classes.
+**Decision taken:** I kept findById returning null so the existing
+behavior does not change.
+
+## Entry 15 - Compilation errors in SaleService
+
+**Question:** I asked why registerSale showed many errors after I
+modified Step 2.
+**Use of AI:** The AI explained that an extra closing brace was closing
+the method too early.
+**Decision taken:** I removed the extra brace and the project compiled.
+
+## Entry 16 - Why custom exceptions and validators
+
+**Question:** I asked what custom exceptions are for and what my
+repository and service changes accomplish.
+**Use of AI:** I received a conceptual explanation of the exception
+hierarchy, separation of responsibilities, and why the refactor keeps
+the external behavior.
+**Decision taken:** I used it to understand my changes before explaining
+them in the oral defense; I will write the guiding-question answers in
+my own words.
+
+## Entry 17 - Updating JavaDocs
+
+**Question:** I asked for help updating the JavaDocs of the classes and
+methods I modified in R6.
+**Use of AI:** I received general guidance on how to write JavaDoc in
+English and which @throws tags to use for the new custom exceptions.
+**What I did myself:** I reviewed each comment to make sure it matches
+what the code does now.
+**Decision taken:** I kept all JavaDocs in English and replaced the
+IllegalArgumentException tags with the custom exceptions.

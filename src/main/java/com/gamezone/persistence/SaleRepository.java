@@ -1,5 +1,6 @@
 package com.gamezone.persistence;
 
+import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Sale;
 
 import java.io.BufferedWriter;
@@ -51,7 +52,7 @@ public class SaleRepository {
             writer.newLine();
 
         } catch (IOException e) {
-            System.out.println("Error saving sale: " + e.getMessage());
+            throw new PersistenceException("Failed to write sale to file '" + filePath + "' (operation: write)", e);
         }
     }
 
