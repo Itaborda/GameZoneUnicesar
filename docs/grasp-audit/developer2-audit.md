@@ -14,7 +14,12 @@ AccessoryRepository: constructor, saveAll(), loadAll()
 AccessoryService: constructor, registerController(), registerCable(), registerMemory(), listAllAccessories(), listAccessoriesByType(), findAccessoriesCompatibleWith(), findById(), updateStock(), restoreStock()
 ### Promotions module (Requirement 2)
 - PromotionRepository: constructor, saveAll(), loadAll()
-- - PromotionService: constructor, registerPercentageDiscount(), registerCategoryDiscount(), registerBulkPurchaseDiscount(), listAllPromotions(), listActivePromotions(), findBestPromotionFor(), findById()
+- PromotionService: constructor, registerPercentageDiscount(), registerCategoryDiscount(), registerBulkPurchaseDiscount(), listAllPromotions(), listActivePromotions(), findBestPromotionFor(), findById()
+### Returns module (Requirement 3)
+- ReturnRepository: constructor, saveAll(), loadAll()
+- - ReturnService: constructor, registerReturn(), viewAllReturns(),
+viewReturnsByCustomer(), viewReturnsBySale(), generateMonthlyBalance(),
+calculateMonthlySales(), calculateMonthlyReturns()
 
 ## 1. Information Expert
 ### Person module
@@ -64,6 +69,28 @@ PromotionService keeps its own list of valid target categories, knowledge
 that CategoryDiscount already holds. Correct usage: findBestPromotionFor()
 and listActivePromotions() ask each promotion (calculateDiscount, isActive)
 instead of computing the discount themselves.
+#### Returns (Requirement 3)
+Verdict for this module: violation.
+##### V-11
+- **ID:** V-11
+- **Pattern:** Information Expert
+- **Module:** Returns (Requirement 3) and Warranties (Requirement 4)
+- **Evidence:** the same lookup of a sale by id is repeated in
+ReturnRepository.loadAll() (lines 122-128), ReturnService.registerReturn()
+(lines 66-72) and WarrantyService.findSaleById() (lines 215-222, used at
+line 157).
+- **Explanation:** The sales are owned by the sales module (SaleService and
+SaleRepository), but three other classes implement their own search.
+- **Consequence:** A change in how a sale is identified requires editing three
+classes.- **Proposed solution:** Add findById(saleId) to SaleService (and to
+SaleRepository, which WarrantyService uses to avoid a cycle) and make the
+three classes call it.
+- **Other developer's code:** Yes. Technical Leader (SaleService and
+SaleRepository). It is a boundary finding.
+Three classes repeat the lookup of a sale by its id, although the sales are
+owned by the sales module. Correct usage: registerReturn() asks
+sale.canBeReturned() and newReturn.calculateRefundAmount() instead of
+computing those rules itself
 
 ## 2. Creator
 ### Person module
@@ -83,6 +110,11 @@ Verdict for this module: violation (see V-08).
 PromotionService instantiates its own PromotionRepository in a field
 initializer. Acceptable: PromotionRepository.loadAll() creates the promotion
 objects because it holds the data read from the file.
+#### Returns (Requirement 3)
+Verdict for this module: correct.
+ReturnService creates the Return objects (registerReturn(), line 100) because
+it records them in its list and has the data to initialize them. In the same
+way, ReturnRepository.loadAll() creates Return objects from the file data.
 
 ## 3. Controller
 ### Person module
@@ -95,6 +127,9 @@ These classes do not receive system events; the menu operations are handled
 by ConsoleMenu, audited by the Technical Leader.
 Patrón 3 · Controlador: no aplica
 #### Promotions (Requirement 2)
+Verdict for this module: not applicable.
+These classes do not receive system events; ConsoleMenu does.
+#### Returns (Requirement 3)
 Verdict for this module: not applicable.
 These classes do not receive system events; ConsoleMenu does.
 
@@ -152,6 +187,41 @@ initializer (Low Coupling, Indirection).
 - **Other developer's code:** No.
 Main keeps passing the concrete repository
 PromotionService depends on the concrete PromotionRepository class.
+#### Returns (Requirement 3)
+Verdict for this module: violation.
+##### V-10
+- **ID:** V-10
+- **Pattern:** Low Coupling
+- **Module:** Returns (Requirement 3), ReturnRepository
+- **Evidence:** ReturnRepository.java, imports at lines 6-8 (AccessoryService,
+ProductService, SaleService), fields at lines 26-28, constructor at lines
+37-46, and loadAll() lines 123-137, which calls saleService.findAll(),
+productService.findById() and accessoryService.findById().
+- **Explanation:** A persistence class depends on three service classes. This
+goes against the dependency direction ui -> service -> persistence -> model
+and creates a cycle: ReturnService -> ReturnRepository -> the services.
+- **Consequence:** The repository cannot be used or tested without three
+services, and changes in those services ripple into persistence.
+- **Proposed solution:** ReturnRepository returns raw rows (ids as text), as
+WarrantyRepository already does, and ReturnService resolves the sale and
+the products in the service layer (Low Coupling, Indirection).
+- **Other developer's code:** Yes. Technical Leader (Main creates
+ReturnRepository with the three services and calls loadAll()).
+ReturnRepository (persistence layer) depends on three services, and
+ReturnService keeps a dependency it never uses.
+##### V-14
+- **ID:** V-14
+- **Pattern:** Low Coupling
+- **Module:** Returns (Requirement 3), ReturnService
+- **Evidence:** ReturnService.java, field at line 19, import at line 5 and
+assignment at line 37 of SaleRepository, which no method of the class uses.
+- **Explanation:** The class receives and stores a dependency it never uses.
+- **Consequence:** An unnecessary dependency on another module's repository
+and a longer constructor.
+- **Proposed solution:** Remove the unused dependency from the class and from
+its constructor.
+- **Other developer's code:** Yes. Technical Leader (Main passes
+saleRepository to the constructor).
 
 ## 5. High Cohesion
 ### Person module
@@ -168,6 +238,26 @@ persistence to the repository.
 Verdict for this module: correct.
 PromotionRepository only handles file access. PromotionService registers,
 lists and selects promotions, and delegates persistence.
+#### Returns (Requirement 3)
+Verdict for this module: violation (see V-13, full table below).
+ReturnService mixes the management of returns with the monthly sales
+reporting
+##### V-13- **ID:** V-13
+- **Pattern:** High Cohesion
+- **Module:** Returns (Requirement 3), ReturnService (monthly balance)
+- **Evidence:** ReturnService.java, lines 176-213: generateMonthlyBalance(),
+calculateMonthlySales() (iterates saleService.findAll(), parses each sale
+date and sums its total) and calculateMonthlyReturns().
+- **Explanation:** The class combines the management of returns with a
+financial report that depends mostly on sales data.
+- **Consequence:** Any change in the report touches the returns service, and
+the class keeps a dependency on SaleService partly for reporting.
+- **Proposed solution:** Move the monthly balance to a separate class (Pure
+Fabrication) that combines sales and returns, or move the monthly sales
+total to SaleService (Information Expert). ReturnService can keep the three
+public methods as thin delegates so ConsoleMenu does not change.
+- **Other developer's code:** No if the delegating methods are kept. Yes
+  (Technical Leader, ConsoleMenu lines 2558-2564) if they are removed.
 
 ## 6. Polymorphism
 ### Person module
@@ -268,6 +358,24 @@ Verdict for this module: violation
 - **Other developer's code:** No.
 Correct usage: findBestPromotionFor() works with the Promotion abstraction
 and calls calculateDiscount() on each one without checking its type.
+#### Returns (Requirement 3)
+Verdict for this module: violation 
+##### V-12- **ID:** V-12
+- **Pattern:** Polymorphism
+- **Module:** Returns (Requirement 3), ReturnService
+- **Evidence:** ReturnService.java, registerReturn(): line 105
+`product instanceof Console` (warranty cancellation) and lines 111-116
+`product instanceof Accessory` to choose between
+accessoryService.restoreStock() and productService.restoreStock().
+- **Explanation:** The method picks the collaborator by checking the concrete
+type of each product.
+- **Consequence:** A new product category with its own stock service requires
+editing this method (and the same structure in SaleService).
+- **Proposed solution:** A common stock-handling abstraction implemented by
+ProductService and AccessoryService, so the returns service does not
+decide by type.
+- **Other developer's code:** Yes. Technical Leader (ProductService.restoreStock
+and SaleService) and Developer 1 (Product and Accessory hierarchies).
 
 ## 7. Pure Fabrication
 ### Person module
@@ -284,6 +392,11 @@ Accessory hierarchy, which stays free of persistence code.
 Verdict for this module: correct.
 PromotionRepository and PromotionService keep file access and application
 logic out of the Promotion hierarchy.
+#### Returns (Requirement 3)
+Verdict for this module: correct.
+ReturnRepository and ReturnService are classes outside the store domain that
+keep persistence and application logic out of Return. The dependency problem
+of ReturnRepository is covered by V-10 under Low Coupling.
 
 ## 8. Indirection
 ### Person module
@@ -297,6 +410,11 @@ service is tied directly to the concrete class.
 #### Promotions (Requirement 2)
 Verdict for this module: violation (see V-08).
 No abstraction sits between PromotionService and PromotionRepository.
+#### Returns (Requirement 3)
+Verdict for this module: violation (see V-10).
+ReturnRepository calls three services directly instead of working through an
+abstraction. By contrast, WarrantyRepository returns raw rows and lets the
+service resolve the references.
 
 ## 9. Protected Variations
 ### Person module
@@ -312,3 +430,8 @@ storage mechanism requires editing AccessoryService.
 Verdict for this module: violation (see V-07, V-08 and V-09).
 A new promotion type, a new valid category or a different storage mechanism
 requires editing existing classes
+#### Returns (Requirement 3)
+Verdict for this module: violation (see V-10 and V-12).
+A change in any of the three services used by ReturnRepository, or a new
+product category with its own stock service, forces edits in the returns
+classes.
