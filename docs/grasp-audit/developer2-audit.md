@@ -12,6 +12,9 @@
 ### Accessories module (Requirement 1)
 AccessoryRepository: constructor, saveAll(), loadAll()
 AccessoryService: constructor, registerController(), registerCable(), registerMemory(), listAllAccessories(), listAccessoriesByType(), findAccessoriesCompatibleWith(), findById(), updateStock(), restoreStock()
+### Promotions module (Requirement 2)
+- PromotionRepository: constructor, saveAll(), loadAll()
+- - PromotionService: constructor, registerPercentageDiscount(), registerCategoryDiscount(), registerBulkPurchaseDiscount(), listAllPromotions(), listActivePromotions(), findBestPromotionFor(), findById()
 
 ## 1. Information Expert
 ### Person module
@@ -40,6 +43,27 @@ the rules (for example, not allowing negative stock) are scattered.
 its own stock; the service calls them and persists.
 - **Other developer's code:** Yes. Developer 1 (Accessory, and Product if the
 same change is applied there).
+#### Promotions (Requirement 2)
+Verdict for this module: violation.
+##### V-09
+- **ID:** V-09
+- **Pattern:** Information Expert
+- **Module:** Promotions (Requirement 2), PromotionService
+- - **Evidence:** PromotionService.java, lines 23-24
+(`ALLOWED_CATEGORY_DISCOUNT_TARGETS = Set.of("VIDEOGAME", "CONSOLE",
+  "ACCESSORY")`) and registerCategoryDiscount(), lines 57-66. The same three
+categories are also handled inside CategoryDiscount.belongsToTargetCategory().
+- **Explanation:** The service holds knowledge about which categories a
+CategoryDiscount accepts, which belongs to CategoryDiscount.
+- **Consequence:** Adding a category requires editing the service and the
+model class separately; they can get out of sync.
+- **Proposed solution:** CategoryDiscount (or a validator) exposes whether a
+target category is valid, and the service delegates to it.
+- **Other developer's code:** Yes. Developer 1 (CategoryDiscount)
+PromotionService keeps its own list of valid target categories, knowledge
+that CategoryDiscount already holds. Correct usage: findBestPromotionFor()
+and listActivePromotions() ask each promotion (calculateDiscount, isActive)
+instead of computing the discount themselves.
 
 ## 2. Creator
 ### Person module
@@ -54,6 +78,11 @@ AccessoryService instantiates its own AccessoryRepository in a field
 initializer instead of receiving it. Acceptable: AccessoryRepository.loadAll()
 creates Controller, Cable and Memory because it holds the data read from the
 file; AccessoryService never creates accessories, it receives them.
+#### Promotions (Requirement 2)
+Verdict for this module: violation (see V-08).
+PromotionService instantiates its own PromotionRepository in a field
+initializer. Acceptable: PromotionRepository.loadAll() creates the promotion
+objects because it holds the data read from the file.
 
 ## 3. Controller
 ### Person module
@@ -64,6 +93,10 @@ belongs to ConsoleMenu, which is audited by the Technical Leader.
 Verdict for this module: not applicable.
 These classes do not receive system events; the menu operations are handled
 by ConsoleMenu, audited by the Technical Leader.
+Patrón 3 · Controlador: no aplica
+#### Promotions (Requirement 2)
+Verdict for this module: not applicable.
+These classes do not receive system events; ConsoleMenu does.
 
 ## 4. Low Coupling
 ### Person module
@@ -79,9 +112,46 @@ Verdict: violation
 - **Proposed solution:** ...
 - **Other developer's code:** No.
 ### Accesory module (requerimiento 1)
-Verdict for this module: violation (see V-05, full table below).
+Verdict for this module: violation
+##### V-05
+-**ID:** V -05
+- **Pattern:** Low Coupling
+- **Module:** Accessories (Requirement 1), AccessoryService
+- **Evidence:** AccessoryService.java, line 19:
+`private AccessoryRepository accessoryRepository =
+new AccessoryRepository("data/accessories.csv");`. The constructor
+(lines 27-28) overwrites it and receives the concrete class.
+- **Explanation:** The service creates and depends on a concrete repository.
+The initializer is dead code but still fixes a hard-coded path.
+- **Consequence:** Changing the storage (another file format or a database)
+requires editing the service. The default path ("data/accessories.csv")
+differs from the one used in Main ("Data/Accessories.csv").
+- **Proposed solution:** An interface in the persistence package implemented
+by AccessoryRepository, received by the service only through the
+constructor; remove the initializer and make the field final
+(Low Coupling, Indirection).
+- **Other developer's code:** No. Main keeps passing the concrete repository.
 AccessoryService depends on the concrete AccessoryRepository class, both in
 the field and in the constructor parameter
+
+#### Promotions (Requirement 2)
+Verdict for this module: violation.
+##### V-08
+- **ID:** V-08
+- **Pattern:** Low Coupling
+- **Module:** Promotions (Requirement 2), PromotionService
+- **Evidence:** PromotionService.java, line 26:
+`private PromotionRepository promotionRepository =
+new PromotionRepository("data/promotions.csv");`. The constructor
+(lines 34-36) overwrites it and receives the concrete class.
+- **Explanation:** The service creates and depends on a concrete repository.
+- **Consequence:** Changing the storage requires editing the service.
+- **Proposed solution:** An interface in the persistence package implemented by
+PromotionRepository and received only through the constructor; remove the
+initializer (Low Coupling, Indirection).
+- **Other developer's code:** No.
+Main keeps passing the concrete repository
+PromotionService depends on the concrete PromotionRepository class.
 
 ## 5. High Cohesion
 ### Person module
@@ -94,6 +164,10 @@ Verdict for this module: correct.
 AccessoryRepository only reads and writes the file. AccessoryService only
 manages the accessory list (register, list, search, stock) and delegates
 persistence to the repository.
+#### Promotions (Requirement 2)
+Verdict for this module: correct.
+PromotionRepository only handles file access. PromotionService registers,
+lists and selects promotions, and delegates persistence.
 
 ## 6. Polymorphism
 ### Person module
@@ -172,6 +246,28 @@ and the service filters by that value (Polymorphism).
 Memory). Reported to the Technical Leader as a boundary finding.
 Correct usage: findAccessoriesCompatibleWith() calls a.isCompatibleWith(id)
 on each accessory without checking its type.
+#### Promotions (Requirement 2)
+Verdict for this module: violation 
+##### V-07
+- **ID:** V-07
+- **Pattern:** Polymorphism
+-  **Module:** Promotions (Requirement 2), PromotionRepository
+- **Evidence:** PromotionRepository.java
+- saveAll(), lines 48, 56 and 65: `p instanceof PercentageDiscount`,
+  `CategoryDiscount`, `BulkPurchaseDiscount`, each branch building a
+  different CSV line.
+- loadAll(), lines 109, 114 and 120: `type.equals("PERCENTAGE")`,
+  `"CATEGORY"`, `"BULK"`, each branch creating a different object.
+- **Explanation:** The repository chooses the layout and the object by
+  checking the concrete type and a type text.
+- **Consequence:** A new promotion type requires editing both methods. A type
+  missing in saveAll() is written as an empty line.
+- **Proposed solution:** A CSV mapper class in the persistence package (Pure
+  Fabrication), one converter per promotion type, keeping the exact file
+  format and the silent skip of unknown types.
+- **Other developer's code:** No.
+Correct usage: findBestPromotionFor() works with the Promotion abstraction
+and calls calculateDiscount() on each one without checking its type.
 
 ## 7. Pure Fabrication
 ### Person module
@@ -184,6 +280,10 @@ Verdict for this module: correct.
 AccessoryRepository and AccessoryService are classes that do not exist in the
 store's domain; they keep file access and application logic out of the
 Accessory hierarchy, which stays free of persistence code.
+#### Promotions (Requirement 2)
+Verdict for this module: correct.
+PromotionRepository and PromotionService keep file access and application
+logic out of the Promotion hierarchy.
 
 ## 8. Indirection
 ### Person module
@@ -194,6 +294,10 @@ both are directly tied.
 Verdict for this module: violation (see V-05).
 No abstraction sits between AccessoryService and AccessoryRepository, so the
 service is tied directly to the concrete class.
+#### Promotions (Requirement 2)
+Verdict for this module: violation (see V-08).
+No abstraction sits between PromotionService and PromotionRepository.
+
 ## 9. Protected Variations
 ### Person module
 Verdict: violation (see V-01 and V-02)
@@ -203,4 +307,8 @@ existing classes.
 Verdict for this module: violation (see V-03, V-04 and V-05).
 Two foreseeable changes are not protected: a new accessory type requires
 editing saveAll(), loadAll() and listAccessoriesByType(), and a different
-storage mechanism requires editing AccessoryService. 
+storage mechanism requires editing AccessoryService.
+#### Promotions (Requirement 2)
+Verdict for this module: violation (see V-07, V-08 and V-09).
+A new promotion type, a new valid category or a different storage mechanism
+requires editing existing classes
