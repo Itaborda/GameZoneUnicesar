@@ -17,9 +17,15 @@ AccessoryService: constructor, registerController(), registerCable(), registerMe
 - PromotionService: constructor, registerPercentageDiscount(), registerCategoryDiscount(), registerBulkPurchaseDiscount(), listAllPromotions(), listActivePromotions(), findBestPromotionFor(), findById()
 ### Returns module (Requirement 3)
 - ReturnRepository: constructor, saveAll(), loadAll()
-- - ReturnService: constructor, registerReturn(), viewAllReturns(),
+- ReturnService: constructor, registerReturn(), viewAllReturns(),
 viewReturnsByCustomer(), viewReturnsBySale(), generateMonthlyBalance(),
 calculateMonthlySales(), calculateMonthlyReturns()
+### Warranties module (Requirement 4)
+- WarrantyRepository: constructor, saveAll(), loadAll()
+- WarrantyService: constructor, assignBasicWarranty(), assignExtendedWarranty(), findWarrantyByProduct(), listAllWarranties(), 
+- listActiveWarranties(), listWarrantiesExpiringSoon(), cancelWarranties(),
+persist(), and the private helpers resolveAll(), generateId() and
+findSaleById()
 
 ## 1. Information Expert
 ### Person module
@@ -91,6 +97,12 @@ Three classes repeat the lookup of a sale by its id, although the sales are
 owned by the sales module. Correct usage: registerReturn() asks
 sale.canBeReturned() and newReturn.calculateRefundAmount() instead of
 computing those rules itself
+#### Warranties (Requirement 4)
+Verdict for this module: violation (see V-11).
+WarrantyService.findSaleById() repeats the sale lookup owned by the sales
+module. Correct usage: findWarrantyByProduct(), listActiveWarranties() and
+cancelWarranties() ask each warranty (isActive, getEndDate,
+getAdditionalCost) instead of computing those values themselves
 
 ## 2. Creator
 ### Person module
@@ -115,6 +127,11 @@ Verdict for this module: correct.
 ReturnService creates the Return objects (registerReturn(), line 100) because
 it records them in its list and has the data to initialize them. In the same
 way, ReturnRepository.loadAll() creates Return objects from the file data.
+#### Warranties (Requirement 4)
+Verdict for this module: correct.
+WarrantyService creates BasicWarranty and ExtendedWarranty objects
+(assignBasicWarranty(), assignExtendedWarranty(), resolveAll()) because it
+records them in its list and has the data needed to initialize them.
 
 ## 3. Controller
 ### Person module
@@ -130,6 +147,9 @@ Patrón 3 · Controlador: no aplica
 Verdict for this module: not applicable.
 These classes do not receive system events; ConsoleMenu does.
 #### Returns (Requirement 3)
+Verdict for this module: not applicable.
+These classes do not receive system events; ConsoleMenu does.
+#### Warranties (Requirement 4)
 Verdict for this module: not applicable.
 These classes do not receive system events; ConsoleMenu does.
 
@@ -223,6 +243,13 @@ its constructor.
 - **Other developer's code:** Yes. Technical Leader (Main passes
 saleRepository to the constructor).
 
+#### Warranties (Requirement 4)
+Verdict for this module: correct.
+WarrantyRepository handles only raw rows of text and depends on no service
+or other repository, as its own documentation states. WarrantyService
+depends on ProductService and SaleRepository, which are in lower or
+equal layers, and does not create a dependency cycle with SaleService
+
 ## 5. High Cohesion
 ### Person module
 Verdict: correct
@@ -258,6 +285,11 @@ total to SaleService (Information Expert). ReturnService can keep the three
 public methods as thin delegates so ConsoleMenu does not change.
 - **Other developer's code:** No if the delegating methods are kept. Yes
   (Technical Leader, ConsoleMenu lines 2558-2564) if they are removed.
+#### Warranties (Requirement 4)
+Verdict for this module: correct.
+WarrantyService is focused on warranties (assign, search, list, cancel). The
+conversion between warranties and file rows is kept in private helpers; the
+type checks inside those helpers are covered by V-15.
 
 ## 6. Polymorphism
 ### Person module
@@ -377,6 +409,28 @@ decide by type.
 - **Other developer's code:** Yes. Technical Leader (ProductService.restoreStock
 and SaleService) and Developer 1 (Product and Accessory hierarchies).
 
+#### Warranties (Requirement 4)
+Verdict for this module: violation.
+##### V-15
+- **ID:** V-15
+- **Pattern:** Polymorphism
+- **Module:** Warranties (Requirement 4), WarrantyService
+- **Evidence:** WarrantyService.java
+- persist(), lines 186-192: `w instanceof BasicWarranty` -> "BASIC" and
+  `w instanceof ExtendedWarranty` -> "EXTENDED".
+- resolveAll(), lines 162-166: `type.equals("BASIC")` and
+  `type.equals("EXTENDED")`, each creating a different object.
+- **Explanation:** The service converts between objects and rows by checking
+  the concrete type and a type text, and it knows the row layout.
+- **Consequence:** A new warranty type requires editing persist() and
+  resolveAll(). A row layout change also changes the service.
+- **Proposed solution:** A mapper class (Pure Fabrication) in the service
+  package with one converter per warranty type, used by persist() and
+  resolveAll(); the file format must stay identical.
+- **Other developer's code:** No.
+Correct usage: cancelWarranties() uses w.getAdditionalCost() and
+listActiveWarranties() uses w.isActive() without checking the warranty type.
+
 ## 7. Pure Fabrication
 ### Person module
 Verdict: correct
@@ -397,6 +451,10 @@ Verdict for this module: correct.
 ReturnRepository and ReturnService are classes outside the store domain that
 keep persistence and application logic out of Return. The dependency problem
 of ReturnRepository is covered by V-10 under Low Coupling.
+#### Warranties (Requirement 4)
+Verdict for this module: correct.
+WarrantyRepository and WarrantyService keep file access and conversion
+logic out of the Warranty hierarchy.
 
 ## 8. Indirection
 ### Person module
@@ -415,6 +473,11 @@ Verdict for this module: violation (see V-10).
 ReturnRepository calls three services directly instead of working through an
 abstraction. By contrast, WarrantyRepository returns raw rows and lets the
 service resolve the references.
+#### Warranties (Requirement 4)
+Verdict for this module: correct.
+The raw rows (type, id, product id, sale id, dates) work as an intermediary
+between WarrantyRepository and the domain: the repository does not know the
+Product or Sale classes, and WarrantyService resolves the references.
 
 ## 9. Protected Variations
 ### Person module
@@ -435,3 +498,8 @@ Verdict for this module: violation (see V-10 and V-12).
 A change in any of the three services used by ReturnRepository, or a new
 product category with its own stock service, forces edits in the returns
 classes.
+#### Warranties (Requirement 4)
+Verdict for this module: violation (see V-15).
+A new warranty type requires editing persist() and resolveAll(). Correct
+point: the repository is isolated from changes in the domain because it only
+handles raw rows.
