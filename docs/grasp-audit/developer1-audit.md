@@ -86,3 +86,7 @@ Creator, Controller, Pure Fabrication, and Indirection cannot be established fro
 `Promotion` evaluates its active date range through `isActive()`. `PercentageDiscount`, `CategoryDiscount`, and `BulkPurchaseDiscount` implement their discount calculations, supporting Information Expert and Polymorphism.
 
 However, `CategoryDiscount.belongsToTargetCategory(Product)` uses concrete-type checks for `VideoGame`, `Console`, and `Accessory`. This issue is included in V-02. The promotion classes otherwise have focused responsibilities. Creator, Controller, Pure Fabrication, and Indirection require evidence from their callers or supporting classes before receiving a definitive verdict.
+
+### 3.3 Returns
+
+`Return` calculates refund amounts and generates return receipts using return-related information. In the assigned method `Sale.canBeReturned()`, the date is checked against the return window and invalid date parsing returns `false`. The rest of `Sale` is outside this audit's scope.
