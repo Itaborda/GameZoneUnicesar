@@ -100,3 +100,27 @@ However, `CategoryDiscount.belongsToTargetCategory(Product)` uses concrete-type 
 ### 3.5 Exceptions and Validation
 
 The exception hierarchy separates error categories through specialized subclasses of `GameZoneException`. `ProductValidator` and `SaleValidator` centralize reusable checks, reducing the need to duplicate validation logic across callers.
+
+## 4. Findings Summary
+
+| ID | Pattern | Main evidence | Coordination |
+| --- | --- | --- | --- |
+| V-01 | Low Coupling | `ProductService` constructs `ProductRepository` and hard-codes its path | Coordinate caller changes if dependency injection is introduced |
+| V-02 | Polymorphism | Concrete-type branches in product persistence and promotion category matching | Consolidate with related findings where causes overlap |
+| V-03 | Protected Variations | CSV parsing, fixed field positions, and string-built records | Confirm overlap with V-02 |
+
+Finding IDs are provisional. The Technical Leader assigns final IDs and consolidates duplicate or overlapping findings. A dependency between modules is not automatically a confirmed cross-developer violation; ownership and the actual root cause must be verified against the team's responsibility assignments.
+
+## 5. Orienting Questions
+
+### 5.1 What criteria were used to classify GRASP verdicts?
+
+A **Violation** requires specific code evidence, a clear connection to the GRASP pattern, and a concrete design consequence. A **Correct** verdict identifies the class or method demonstrating the pattern. **Not Applicable** is appropriate only when the pattern does not meaningfully apply to the reviewed responsibility, with a brief justification. Evidence uses class and method names because line numbers may change between versions. All findings must be checked against the actual branch before consolidation.
+
+### 5.2 How were findings involving different developers' code recorded and assigned?
+
+Potential cross-module issues are recorded with the affected class, concrete dependency, consequence, and proposed coordination. For example, `CategoryDiscount` depends on the product hierarchy, and changing `ProductService` construction may affect application wiring. These dependencies must not automatically be classified as cross-developer violations: the team must confirm code ownership and the root cause. The Technical Leader consolidates overlapping findings, assigns final IDs, and coordinates any required changes with the relevant members.
+
+## 6. Phase 1 Boundary
+
+This report records design observations only. It does not authorize Java source changes or refactoring during Phase 1. Any proposed solution must be reviewed in the appropriate later phase, preserve existing behavior, and be coordinated with affected team members.
