@@ -3,154 +3,86 @@
 
 ## 1. Audit Scope
 
-This report covers the responsibilities assigned to Developer 1 for Requirement 7, Phase 1.
+**Project:** GameZoneUnicesar  
+**Role:** Developer 1 — Requirement 7, Phase 1.
 
-### 1.1 Products — Workshop 1
+The audit covers the following assigned classes and packages:
 
-Classes and methods included:
-- `Product`
-- `VideoGame`
-- `Console`
-- `ProductRepository`
-- `ProductService`, excluding `restoreStock()`, which is assigned to the Technical Leader.
+- **Products:** `Product`, `VideoGame`, `Console`, `ProductRepository`, and `ProductService`, excluding `restoreStock()`.
+- **Accessories:** `Accessory`, `Controller`, `Cable`, and `Memory`.
+- **Promotions:** `Promotion`, `PercentageDiscount`, `CategoryDiscount`, and `BulkPurchaseDiscount`.
+- **Returns:** `Return` and only `Sale.canBeReturned()`.
+- **Warranties:** `Warranty`, `BasicWarranty`, and `ExtendedWarranty`.
+- **Supporting classes:** `exceptions` and `validation` packages.
 
-### 1.2 Accessories — Requirement 1
+`ProductService.restoreStock()`, the remaining `Sale` methods, `SaleRepository`, `SaleService`, `ConsoleMenu`, and `Main` belong to the Technical Leader's audit. Findings are provisional until the Technical Leader consolidates the team's reports. No Java source code changes were made during Phase 1.
 
-Classes included:
-- `Accessory`
-- `Controller`
-- `Cable`
-- `Memory`
+## 2. GRASP Pattern Assessment
 
-### 1.3 Promotions — Requirement 2
+### 2.1 Information Expert — Correct
 
-Classes included:
-- `Promotion`
-- `PercentageDiscount`
-- `CategoryDiscount`
-- `BulkPurchaseDiscount`
+Domain classes generally use the data they own. `Accessory.isCompatibleWith()` checks compatibility using compatible-console IDs; `Promotion.isActive()` evaluates the promotion dates; promotion subclasses calculate their own discounts; `Return` calculates refunds; and `Warranty` determines expiration using its start date and duration. `ProductValidator` and `SaleValidator` centralize reusable validation checks.
 
-### 1.4 Returns — Requirement 3
+### 2.2 Creator — Correct
 
-Classes and methods included:
-- `Return`
-- `Sale.canBeReturned()`
+`ProductRepository.findAll()` reconstructs `VideoGame` and `Console` objects from persisted records. The repository reads the data required to recreate these objects. Concrete-type checks involved in this process are discussed under Polymorphism.
 
-The audit of `Sale` is limited to `canBeReturned()`.
+### 2.3 Controller — Not Applicable
 
-### 1.5 Warranties — Requirement 4
+The assigned scope focuses mainly on domain classes, repositories, and validators rather than the system-event entry point. `Main` and `ConsoleMenu` are reviewed by the Technical Leader. This verdict does not mean that the entire application lacks a Controller.
 
-Classes included:
-- `Warranty`
-- `BasicWarranty`
-- `ExtendedWarranty`
+### 2.4 Low Coupling — Violation (V-01)
 
-### 1.6 Exceptions and Validation — Requirement 6
+**Module:** Products.
 
-The audit covers the assigned `exceptions` and `validation` packages, including the responsibilities of exception classes, validation rules, and their use by the assigned modules.
+**Evidence:** `ProductService` directly creates `new ProductRepository("data/product.csv")` and calls `findAll()` and `saveAll()`.
 
-## 2. Audit Criteria
+**Explanation and consequence:** The service depends on a concrete persistence implementation and hard-codes the file path. Changing the persistence configuration or testing the service independently becomes harder.
 
-All nine GRASP patterns will be evaluated:
+**Proposed solution:** Inject `ProductRepository` through the service constructor, preserving the current default path and behavior. Coordinate any required caller changes with the Technical Leader.
 
-1. Information Expert
-2. Creator
-3. Controller
-4. Low Coupling
-5. High Cohesion
-6. Polymorphism
-7. Pure Fabrication
-8. Indirection
-9. Protected Variations
+### 2.5 High Cohesion — Correct
 
-Each pattern must receive one verdict: `Correct`, `Violation`, or `Not Applicable`.
+The reviewed classes generally have focused responsibilities. `ProductRepository` manages product persistence, validators handle reusable checks, domain classes maintain related data and behavior, and exception subclasses represent different error categories.
 
-Each verdict must include code-based evidence and an explanation. A violation must additionally identify the affected module, design problem, consequences, proposed solution, and whether coordination with another developer is required.
+### 2.6 Polymorphism — Violation (V-02)
 
-Finding IDs in this report are provisional until the Technical Leader consolidates the team's findings.
+**Modules:** Products and Promotions.
 
-## 3. Phase 1 Restrictions
+**Evidence:** `ProductRepository.saveAll()` uses `instanceof VideoGame` and `instanceof Console` with casts to access subtype fields. `findAll()` checks literal record markers. `CategoryDiscount.belongsToTargetCategory(Product)` also branches on `instanceof VideoGame`, `Console`, and `Accessory`.
 
-This phase documents design findings. No Java source code will be modified during the audit. Proposed solutions must preserve existing observable behavior and be considered during the subsequent refactoring phase.
+**Explanation and consequence:** Some subtype-specific behavior depends on concrete-type checks rather than a shared polymorphic operation. Adding a new product type may require changes in several conditional branches.
 
-## 4. Products Module Audit — Workshop 1
+**Proposed solution:** Evaluate a product-record mapper or serializer for persistence and a category-resolution abstraction for promotions. Preserve the current file format and discount behavior. The Technical Leader should consolidate overlapping findings if they share the same root cause.
 
-### 4.1 Information Expert
+### 2.7 Pure Fabrication — Correct
 
-**Verdict: Correct**
+`ProductRepository` separates file persistence from domain entities. `ProductValidator` and `SaleValidator` centralize validation, while the exception hierarchy provides reusable error types. These supporting classes handle technical responsibilities outside the domain entities.
 
-The `Product` class contains the common product data, while `VideoGame` and `Console` contain subtype-specific information. This assigns product-related data and behavior to the classes that have the relevant information.
+### 2.8 Indirection — Correct
 
-### 4.2 Creator
+Product services access file persistence through a repository, and validators centralize reusable checks. The direct construction of `ProductRepository` is documented separately in V-01; it does not eliminate the repository's intermediary role.
 
-**Verdict: Correct**
+### 2.9 Protected Variations — Violation (V-03)
 
-`ProductRepository.findAll()` reconstructs `VideoGame` and `Console` objects from the stored product records. The repository reads the persisted data and uses it to create the corresponding product objects.
+**Module:** Products.
 
-### 4.3 Controller
+**Evidence:** `ProductRepository.findAll()` parses records using `line.split(",")`, fixed indexes such as `data[1]` through `data[7]`, and literal type markers. `saveAll()` builds CSV records through string concatenation.
 
-**Verdict: Not Applicable**
+**Explanation and consequence:** Assumptions about the storage format are embedded in repository methods. A field containing a comma or a future format change could break record reconstruction.
 
-The assigned product classes and `ProductService` are not the application's main user-interface event entry point. The system-level Controller responsibility must be evaluated alongside the application entry point and menu, which are outside this developer's assigned scope.
+**Proposed solution:** Centralize record encoding and decoding while preserving the current file representation. Review escaping, malformed-row handling, and migration behavior separately. V-02 and V-03 may overlap and should be consolidated if they share one root cause.
 
-### 4.4 Low Coupling
+## 3. Additional Module Assessments
 
-**Verdict: Violation — V-01**
+### 3.1 Accessories
 
-**Evidence:** `ProductService` directly creates a concrete `ProductRepository` and uses the hard-coded path `data/product.csv`.
+`Accessory` owns compatible-console IDs and implements `isCompatibleWith()`, supporting Information Expert. `Controller`, `Cable`, and `Memory` override `getDescription()`, demonstrating Polymorphism. Their shared accessory state and focused description behavior support High Cohesion.
 
-**Explanation:** The service is coupled to a specific repository implementation and storage location instead of receiving these dependencies from outside.
+Creator, Controller, Pure Fabrication, and Indirection cannot be established from the domain subclasses alone; their applicability must be judged using the relevant application and supporting classes.
 
-**Consequence:** Changing the persistence implementation or configuring a different data location requires changes to the service.
+### 3.2 Promotions
 
-**Proposed solution:** Inject the repository through the service constructor and centralize or configure the file path. Preserve existing behavior and coordinate any interface or constructor changes with the responsible team member.
+`Promotion` evaluates its active date range through `isActive()`. `PercentageDiscount`, `CategoryDiscount`, and `BulkPurchaseDiscount` implement their discount calculations, supporting Information Expert and Polymorphism.
 
-**Requires another developer:** Potentially, if other classes instantiate `ProductService` or depend on its current constructor.
-
-### 4.5 High Cohesion
-
-**Verdict: Correct**
-
-`ProductService` handles product-related operations, while `ProductRepository` handles product persistence. These responsibilities are separated into service and repository classes rather than being concentrated in one class.
-
-### 4.6 Polymorphism
-
-**Verdict: Violation — V-02**
-
-**Evidence:** `ProductRepository.saveAll()` distinguishes `VideoGame` and `Console` using concrete type checks and casts before writing their subtype-specific fields.
-
-**Explanation:** Persistence logic depends on explicit knowledge of the concrete product subclasses rather than a polymorphic serialization contract.
-
-**Consequence:** Adding another product subtype may require additional conditional branches in the repository.
-
-**Proposed solution:** Consider a polymorphic serialization or mapping design that preserves the existing stored format and supports the current product types.
-
-**Requires another developer:** Coordinate changes to the product hierarchy or persisted-data format with the developers responsible for those contracts.
-
-### 4.7 Pure Fabrication
-
-**Verdict: Correct**
-
-`ProductRepository` separates file persistence from the domain model, and `ProductValidator` centralizes product validation rules. These responsibilities are assigned to supporting classes instead of being placed entirely in the product entities.
-
-### 4.8 Indirection
-
-**Verdict: Correct**
-
-`ProductService` accesses persisted products through `ProductRepository` rather than performing file operations directly. The repository provides an intermediary between the service and the file storage.
-
-### 4.9 Protected Variations
-
-**Verdict: Violation — V-03**
-
-**Evidence:** `ProductRepository.saveAll()` builds records using explicit field concatenation, while `findAll()` parses records with `split(",")`, fixed field positions, and the type markers `VIDEOGAME` and `CONSOLE`.
-
-**Explanation:** The persistence implementation depends directly on the current CSV layout and type markers.
-
-**Consequence:** Changes to the record format can affect both writing and reading, and may make existing data incompatible.
-
-**Proposed solution:** Encapsulate the CSV mapping and parsing rules so format-related changes are handled in a clearly defined place. Preserve compatibility with existing data.
-
-**Requires another developer:** Coordinate with anyone who changes product fields or relies on the current persisted-data format.
-
-**Consolidation note:** V-02 and V-03 are related but describe different design concerns. The Technical Leader should determine whether they remain separate findings or are consolidated into one finding to avoid duplicate remediation.
+However, `CategoryDiscount.belongsToTargetCategory(Product)` uses concrete-type checks for `VideoGame`, `Console`, and `Accessory`. This issue is included in V-02. The promotion classes otherwise have focused responsibilities. Creator, Controller, Pure Fabrication, and Indirection require evidence from their callers or supporting classes before receiving a definitive verdict.
