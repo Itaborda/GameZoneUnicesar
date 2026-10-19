@@ -90,3 +90,13 @@ However, `CategoryDiscount.belongsToTargetCategory(Product)` uses concrete-type 
 ### 3.3 Returns
 
 `Return` calculates refund amounts and generates return receipts using return-related information. In the assigned method `Sale.canBeReturned()`, the date is checked against the return window and invalid date parsing returns `false`. The rest of `Sale` is outside this audit's scope.
+
+### 3.4 Warranties
+
+`Warranty` uses the start date and duration to determine expiration, while `BasicWarranty` and `ExtendedWarranty` represent different warranty types.
+
+**Additional observation:** `BasicWarranty` checks `product instanceof Console` and rejects other product types. This creates a dependency on the concrete `Console` class. However, the check may implement an intentional business rule, so the team must confirm warranty eligibility before treating it as a violation. If eligibility is expected to vary by product category, a shared eligibility contract could reduce coupling.
+
+### 3.5 Exceptions and Validation
+
+The exception hierarchy separates error categories through specialized subclasses of `GameZoneException`. `ProductValidator` and `SaleValidator` centralize reusable checks, reducing the need to duplicate validation logic across callers.
