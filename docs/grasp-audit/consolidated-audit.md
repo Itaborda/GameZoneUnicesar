@@ -5,144 +5,135 @@
 - **Project:** GameZoneUnicesar
 - **Responsible:** Technical Leader
 - **Audit branch:** `develop`
-- **Audited commit:** Pending confirmation of the exact commit hash
-- **Status:** Preliminary consolidation — team reports pending
-- **Scope:** GRASP design review before refactoring
+- **Audited commit:** Pending confirmation of the exact commit hash corresponding to the audited code.
+- **Status:** Individual reports integrated; team consolidation and validation pending.
+- **Scope:** GRASP design review before refactoring.
 
-This document consolidates the Technical Leader's preliminary audit and provides a structure for integrating the findings submitted by the other developers. Findings and verdicts remain provisional until the evidence and the complete team design have been reviewed.
+This document consolidates the preliminary audit from the Technical Leader and the individual reports submitted by Developer 1 and Developer 2. All findings and verdicts remain provisional until the team reviews the evidence, resolves overlapping findings, confirms the audited code version, and agrees on the final conclusions.
 
 ## 2. Audit Coverage
 
 | Module or responsibility | Assigned reviewer | Status |
 |---|---|---|
-| Sale | Technical Leader | Reviewed |
-| SaleRepository | Technical Leader | Reviewed |
-| SaleService | Technical Leader | Reviewed |
-| ConsoleMenu | Technical Leader | Reviewed |
+| Sale | Technical Leader | Reviewed; team validation pending |
+| SaleRepository | Technical Leader | Reviewed; team validation pending |
+| SaleService | Technical Leader | Reviewed; team validation pending |
+| ConsoleMenu | Technical Leader | Reviewed; team validation pending |
 | Main | Technical Leader | Coverage confirmation pending |
-| ProductService.restoreStock | Technical Leader | Reviewed |
-| Accessories, promotions, and warranties integration | Technical Leader | Reviewed |
-| Product, VideoGame, Console, ProductRepository, ProductService | Developer 1 | Report pending |
-| Person, Customer, Seller, PersonRepository, PersonService | Developer 2 | Report pending |
+| ProductService.restoreStock | Technical Leader | Reviewed; team validation pending |
+| Accessories, promotions, and warranties integration | Technical Leader | Reviewed; cross-module validation pending |
+| Product, VideoGame, Console, ProductRepository, ProductService | Developer 1 | Individual report integrated; validation pending |
+| Person, Customer, Seller, PersonRepository, PersonService | Developer 2 | Individual report integrated; validation pending |
 
-The coverage status refers to the current review records. Final completeness must be confirmed against the actual files and the reports submitted by each developer.
+The coverage status reflects the reports currently available in `develop`. The team must verify that each assigned class and responsibility was reviewed against the relevant code version.
 
 ## 3. GRASP Pattern Verdicts
 
-The following verdicts are preliminary. A final team verdict requires consideration of all relevant modules and the evidence collected.
+The following verdicts remain preliminary until the team completes the consolidation.
 
-| GRASP pattern | Preliminary verdict | Notes |
+| GRASP pattern | Preliminary verdict | Next step |
 |---|---|---|
-| Information Expert | Pending consolidation | Review whether responsibilities are assigned to classes that possess the required information. |
-| Creator | Pending consolidation | Review object creation responsibilities and object relationships. |
-| Controller | Pending consolidation | Review whether system events are handled by an appropriate controller. |
-| Low Coupling | Candidate violation | V-02; assess the UI/business-layer dependency and duplicated checks. |
-| High Cohesion | Candidate violation | V-01; ConsoleMenu combines many independent UI workflows. |
-| Polymorphism | Candidate violation | V-03; SaleService branches on concrete item types for inventory operations. |
-| Pure Fabrication | Pending consolidation | Review whether service or repository classes provide appropriate non-domain responsibilities. |
-| Indirection | Pending consolidation | Review whether an intermediary is needed to reduce direct dependencies. |
-| Protected Variations | Candidate violation | V-03 may also concern protection against changes in inventory categories; avoid counting the same underlying issue twice. |
+| Information Expert | Pending consolidation | Review evidence from all individual reports |
+| Creator | Pending consolidation | Review object creation responsibilities |
+| Controller | Pending consolidation | Review system-event responsibilities |
+| Low Coupling | Candidate violations submitted | Compare evidence and merge duplicate findings |
+| High Cohesion | Candidate violations submitted | Validate responsibilities and evidence |
+| Polymorphism | Candidate violations submitted | Review conditional behavior across modules |
+| Pure Fabrication | Pending consolidation | Review evidence from all individual reports |
+| Indirection | Pending consolidation | Review dependencies and intermediary responsibilities |
+| Protected Variations | Candidate violations submitted | Determine whether findings represent distinct problems or overlap with other patterns |
 
-**Verdict criteria:** Use *Violation* when the evidence demonstrates a design problem, *Correct* when the implementation adequately applies the pattern, and *Not Applicable* when the pattern is not relevant to the responsibility being evaluated. Use *Pending* only during this preliminary consolidation; replace it with a supported team verdict before final submission.
+**Verdict criteria:** Use *Violation* when the evidence demonstrates a design problem, *Correct* when the implementation adequately applies the pattern, and *Not Applicable* when the pattern is not relevant to the responsibility being evaluated. Replace every *Pending* verdict with a supported team conclusion before final submission.
 
 ## 4. Consolidated Findings
 
-### V-01 — High Cohesion: ConsoleMenu combines multiple UI modules
+The findings currently recorded in this section originate from the Technical Leader's preliminary audit. Their evidence, scope, pattern classification, overlap with other reports, and final identifiers must be reviewed by the team before refactoring begins.
+
+### V-01 — Preliminary finding: ConsoleMenu responsibilities
 
 - **Pattern:** High Cohesion
 - **Module:** `com.gamezone.ui.ConsoleMenu`
 - **Source report:** Technical Leader
-- **Evidence:** The reviewed file contains approximately 2,684 lines and includes workflows for products, people, sales, returns, promotions, accessories, warranties, input parsing, and exception messages. Examples include `showWarrantyMenu()`, `showPromotionMenu()`, `accessoryMenu()`, `showPersonMenu()`, `showSaleMenu()`, and `showReturnMenu()`.
-- **Explanation:** The class handles multiple independent interface workflows instead of focusing on a narrower UI responsibility.
-- **Consequence:** Changes to separate modules can affect the same large class, increasing maintenance, testing, and integration difficulty.
-- **Proposed solution:** Keep the main menu as the entry point and extract module-specific interactions into separate UI components. Preserve menu options, Spanish messages, and existing behavior.
-- **Other member's code involved:** Yes.
-- **Status:** Candidate finding; confirm evidence against the audited `develop` version.
+- **Status:** Preliminary; team validation pending.
 
-### V-02 — Low Coupling: Sale validation is duplicated across UI and service layers
+### V-02 — Preliminary finding: Sale validation across UI and service layers
 
 - **Pattern:** Low Coupling
 - **Modules:** `ConsoleMenu.registerSale()` and `SaleService.registerSale()`
 - **Source report:** Technical Leader
-- **Evidence:** The UI checks customer, seller, and item existence and performs stock checks before completing the sale flow. The service also validates sale data, resolves inventory items, and checks stock availability.
-- **Explanation:** Some business checks and object-resolution responsibilities are spread across the UI and service layer.
-- **Consequence:** Business rules may drift between layers, making changes harder to maintain consistently.
-- **Proposed solution:** Keep user prompts and messages in the UI. Make the service layer responsible for authoritative business validation, exposing appropriate lookup or validation operations where needed. Preserve user-visible behavior.
-- **Other member's code involved:** Yes.
-- **Status:** Candidate finding; distinguish duplicated business rules from UI checks that exist only to guide the user.
+- **Status:** Preliminary; team validation pending.
 
-### V-03 — Polymorphism / Protected Variations: Concrete-type branching in inventory handling
+### V-03 — Preliminary finding: Concrete-type branching in inventory handling
 
 - **Pattern:** Polymorphism; potentially Protected Variations
 - **Module:** `SaleService.registerSale()`
 - **Source report:** Technical Leader
-- **Evidence:** The service uses `instanceof Accessory` to choose between `AccessoryService` and `ProductService` during validation and again when updating stock.
-- **Explanation:** Inventory operations depend on concrete item-type checks in multiple places, so introducing another sellable category could require changes to the sale workflow.
-- **Consequence:** The service becomes more sensitive to changes in inventory categories and may accumulate conditional branches.
-- **Proposed solution:** Evaluate a common inventory-handling abstraction or a strategy/registry that resolves the correct inventory operation while retaining the existing services. Validate the design before implementing it.
-- **Other member's code involved:** Yes.
-- **Status:** Candidate finding. Treat Polymorphism and Protected Variations as related aspects of the same underlying issue unless the audit establishes distinct problems.
+- **Status:** Preliminary; team validation pending. The team must determine whether the observations under these two patterns describe one underlying issue or distinct issues.
 
-## 5. Findings Pending From Other Reports
+**Identifier note:** V-01, V-02, and V-03 are provisional identifiers from the Technical Leader's report. They must be reconciled with identifiers in Developer 1's and Developer 2's reports before the final consolidated audit is approved.
 
-The following sections must be completed after the assigned developers submit their individual reports.
+## 5. Findings Submitted by Other Developers — Pending Consolidation
 
-### Developer 1 — Products module
+### Developer 1 — Products and related modules
 
-- **Assigned scope:** Product, VideoGame, Console, ProductRepository, ProductService.
-- **Report status:** Pending.
-- **Required integration:** Record findings with unique IDs, exact evidence, consequences, proposed solutions, and any cross-module dependencies.
+- **Assigned scope:** Product, VideoGame, Console, ProductRepository, ProductService, and the additional classes listed in the individual report.
+- **Report status:** Integrated into `develop`; team validation pending.
+- **Required integration:** Review the evidence, consequences, proposed solutions, affected classes, and cross-module dependencies. Reconcile provisional finding IDs with the consolidated list.
 
-### Developer 2 — People module
+### Developer 2 — People and related modules
 
-- **Assigned scope:** Person, Customer, Seller, PersonRepository, PersonService.
-- **Report status:** Pending.
-- **Required integration:** Record findings with unique IDs, exact evidence, consequences, proposed solutions, and any cross-module dependencies.
+- **Assigned scope:** Person, Customer, Seller, PersonRepository, PersonService, and the additional classes listed in the individual report.
+- **Report status:** Integrated into `develop`; team validation pending.
+- **Required integration:** Review the evidence, consequences, proposed solutions, affected classes, and cross-module dependencies. Reconcile provisional finding IDs with the consolidated list.
 
 ## 6. Cross-Module Review and Deduplication
 
-Before approving the final audit:
+Before approving the final audit, the team must:
 
-1. Verify that each finding is supported by the audited `develop` version.
-2. Assign a unique ID to each distinct design problem.
-3. Merge findings that describe the same underlying problem across module boundaries.
-4. Record the original report and responsible reviewer for each finding.
-5. Confirm whether a finding involves another developer's code.
+1. Verify each finding against the relevant audited code version.
+2. Review the evidence supplied in each individual report.
+3. Assign a unique identifier to each distinct, accepted finding.
+4. Merge findings that describe the same underlying design problem, preserving their original sources.
+5. Record the responsible owner and any cross-module dependencies.
 6. Separate GRASP design findings from functional defects and compilation issues.
-7. Ensure that each of the nine GRASP patterns has a final, evidence-based team verdict.
+7. Establish a final, evidence-based verdict for each of the nine GRASP patterns.
+8. Confirm coverage of all assigned classes and responsibilities.
 
 ## 7. Out-of-Scope Functional Issues
 
-Functional defects should be documented separately from GRASP findings. They must not be presented as GRASP violations without design evidence.
+Functional defects must be documented separately from GRASP findings. They must not be classified as GRASP violations without supporting design evidence.
 
-Items to verify include:
+Items requiring verification include:
 
 - Whether warranty costs are counted twice when calculating displayed sale totals.
 - Whether monthly sales calculations consistently account for discounts.
 - Whether repository persistence failures can leave in-memory data inconsistent with stored data.
 - Whether unresolved sale or product references are handled safely when loading returns.
 
-These are verification items, not confirmed final findings.
+These are verification items, not confirmed final findings. The team must determine whether they fall outside the scope of the GRASP refactoring.
 
 ## 8. Refactoring and Validation Plan
 
-No refactoring is authorized by this preliminary audit alone.
+Refactoring must begin only after the team validates the consolidated findings and agrees on their owners.
 
-After the team validates the findings:
-
-1. Agree on the final findings and their owners.
-2. Prioritize corrections by impact and dependency.
-3. Document the current and proposed class designs in `docs/grasp-class-diagram.md`.
-4. Record the team's design reasoning in `docs/grasp-analysis.md`.
-5. Implement changes in coordinated branches.
-6. Run tests and compare externally observable behavior, including menu options, Spanish messages, sale totals, discounts, inventory updates, returns, and warranties.
-7. Review the changes before merging into `develop`.
+1. Confirm the code version used for the audit and record the appropriate commit hash.
+2. Review and approve the final findings, unique identifiers, and owners.
+3. Define the regression-test strategy and record baseline results before corrections.
+4. Document the initial design and the proposed design in `docs/grasp-class-diagram.md`.
+5. Record the team's evidence-based design reasoning in `docs/grasp-analysis.md`.
+6. Create and maintain `docs/grasp-refactor-log.md` to track corrections, commits, PRs, and test results.
+7. Implement only the approved GRASP corrections, preserving existing observable behavior.
+8. Compile and test the affected operations before submitting each PR.
+9. Run the final regression checks and update the project documentation before final approval.
 
 ## 9. Final Approval
 
-- **Technical Leader review:** Pending final consolidation.
-- **Developer 1 report:** Pending.
-- **Developer 2 report:** Pending.
+- **Technical Leader review:** Pending team validation.
+- **Developer 1 report:** Integrated; validation pending.
+- **Developer 2 report:** Integrated; validation pending.
 - **Nine-pattern team verdicts:** Pending.
+- **Unique finding IDs and ownership:** Pending consolidation.
+- **Regression-test baseline:** Pending confirmation.
 - **Refactoring approval:** Pending team review.
-- **Final audited commit hash:** Pending confirmation.
+- **Audited commit hash:** Pending confirmation.
+- **Final approval:** Pending.
