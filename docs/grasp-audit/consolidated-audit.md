@@ -54,6 +54,11 @@ The findings currently recorded in this section originate from the Technical Lea
 - **Pattern:** High Cohesion
 - **Module:** `com.gamezone.ui.ConsoleMenu`
 - **Source report:** Technical Leader
+- **Evidence:** `ConsoleMenu.java` contains approximately 2,684 lines and includes methods for products, people, sales, returns, promotions, accessories, warranties, input parsing, and exception messages. Examples include `showWarrantyMenu()` (around line 144), `showPromotionMenu()` (around line 420), `accessoryMenu()` (around line 895), `showPersonMenu()` (around line 1566), `showSaleMenu()` (around line 1769), and `showReturnMenu()` (around line 2195).
+- **Explanation:** The class groups user-interface flows for multiple independent business modules instead of focusing on a single cohesive interface responsibility.
+- **Consequence:** Changes to one module's interaction can affect a large class, making navigation, testing, and team integration more difficult.
+- **Proposed Solution:** Keep the main menu as the entry point and evaluate extracting module-specific interaction flows into separate UI classes or menu components, preserving existing menu options, Spanish messages, and behavior.
+- **Other Member's Code Involved:** Yes; the menu integrates products, people, accessories, promotions, returns, and warranties maintained across the team.
 - **Status:** Preliminary; team validation pending.
 
 ### V-02 — Preliminary finding: Sale validation across UI and service layers
@@ -61,6 +66,11 @@ The findings currently recorded in this section originate from the Technical Lea
 - **Pattern:** Low Coupling
 - **Modules:** `ConsoleMenu.registerSale()` and `SaleService.registerSale()`
 - **Source report:** Technical Leader
+- **Evidence:** `ConsoleMenu.registerSale()` checks whether customers, sellers, and items exist (approximately lines 1825–1839), searches for the selected customer and seller (approximately lines 1859–1897), and checks product/accessory stock before adding items (approximately lines 1942–1954 and 2022–2035). `SaleService.registerSale()` also validates sale data and resolves items and stock availability (approximately lines 63–79).
+- **Explanation:** Some business-rule checks and object resolution are performed in the UI and repeated in the service layer, spreading responsibility across layers.
+- **Consequence:** Changes to stock or existence rules may require updates in multiple places, allowing the UI and service behavior to become inconsistent.
+- **Proposed Solution:** Keep prompting, displaying choices, and printing Spanish messages in `ConsoleMenu`. Evaluate centralizing authoritative business validation in services and exposing the required lookup or validation operations, preserving user-visible behavior.
+- **Other Member's Code Involved:** Yes; the sale flow calls services for products, people, and accessories.
 - **Status:** Preliminary; team validation pending.
 
 ### V-03 — Preliminary finding: Concrete-type branching in inventory handling
@@ -68,7 +78,13 @@ The findings currently recorded in this section originate from the Technical Lea
 - **Pattern:** Polymorphism; potentially Protected Variations
 - **Module:** `SaleService.registerSale()`
 - **Source report:** Technical Leader
-- **Status:** Preliminary; team validation pending. The team must determine whether the observations under these two patterns describe one underlying issue or distinct issues.
+- **Evidence:** The method uses `if (product instanceof Accessory)` to choose between `accessoryService.findById(...)` and `productService.findById(...)` during validation (approximately lines 69–79), and repeats the type-based distinction when updating stock (approximately lines 142–158).
+- **Explanation:** Inventory behavior is selected through concrete type checks in multiple places, so adding a new sellable item category or changing inventory handling may require changes to the sale service's conditional logic.
+- **Consequence:** The sale workflow becomes more sensitive to changes in product categories and may accumulate additional conditional branches as the system grows.
+- **Proposed Solution:** Evaluate a common inventory-handling abstraction or a small strategy/registry that keeps the existing `ProductService` and `AccessoryService` implementations behind a shared mechanism. Verify that sale and stock behavior remain unchanged before approving a design.
+- **Other Member's Code Involved:** Yes; the finding concerns integration with the accessory and product modules.
+- **Status:** Preliminary; team validation pending.
+- **Classification note:** The team must determine whether the Polymorphism and Protected Variations observations represent one underlying issue or distinct findings.
 
 **Identifier note:** V-01, V-02, and V-03 are provisional identifiers from the Technical Leader's report. They must be reconciled with identifiers in Developer 1's and Developer 2's reports before the final consolidated audit is approved.
 
