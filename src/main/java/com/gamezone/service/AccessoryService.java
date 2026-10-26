@@ -16,8 +16,8 @@ import java.util.List;
  * in memory to avoid reading the file on every operation.
  */
 public class AccessoryService {
-    private AccessoryRepository accessoryRepository = new AccessoryRepository("data/accessories.csv");
-    private List<Accessory> accessories;
+    private final AccessoryRepository accessoryRepository;
+    private final List<Accessory> accessories;
     /**
      * Creates a new accessory service backed by the given repository,
      * loading the initial list of accessories from it.
