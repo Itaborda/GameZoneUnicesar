@@ -1,7 +1,7 @@
 package com.gamezone.service;
 
 import com.gamezone.model.*;
-import com.gamezone.persistence.PromotionRepository;
+import com.gamezone.persistence.PromotionStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Provides the business logic for managing promotions in the
  * GameZone system. This service is the only class authorized to
- * interact with {@link PromotionRepository} for persistence
+ * interact with {@link PromotionStorage} for persistence
  * operations, keeping the current list of promotions in memory to
  * avoid reading the file on every operation. It is also responsible
  * for selecting the best applicable promotion for a given sale.
@@ -23,15 +23,15 @@ public class PromotionService {
     private static final Set<String> ALLOWED_CATEGORY_DISCOUNT_TARGETS =
             Set.of("VIDEOGAME", "CONSOLE", "ACCESSORY");
 
-    private PromotionRepository promotionRepository = new PromotionRepository("data/promotions.csv");
+    private PromotionStorage promotionRepository;
     private List<Promotion> promotions;
     /**
      * Creates a new promotion service backed by the given repository,
      * loading the initial list of promotions from it.
      *
-     * @param promotionRepository the repository used to persist promotions
+     * @param promotionRepository the storage used to persist promotions
      */
-    public PromotionService(PromotionRepository promotionRepository) {
+    public PromotionService(PromotionStorage promotionRepository) {
         this.promotionRepository = promotionRepository;
         this.promotions = promotionRepository.loadAll();
     }

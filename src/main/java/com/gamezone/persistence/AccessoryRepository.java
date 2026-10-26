@@ -14,7 +14,8 @@ import java.util.List;
  * This class is responsible for saving and loading controllers,
  * cables, and memories to and from a CSV-formatted text file.
  */
-public class AccessoryRepository {
+public class AccessoryRepository implements AccessoryStorage {
+
     private String filePath;
     /**
      * Creates a new repository that reads from and writes to the
@@ -34,6 +35,7 @@ public class AccessoryRepository {
      *
      * @param accessories the list of accessories to save
      */
+    @Override
     public void saveAll(List<Accessory> accessories) {
         File file = new File(filePath);
         File parent = file.getParentFile();
@@ -93,6 +95,7 @@ public class AccessoryRepository {
      * @return the list of accessories loaded from the file, or an empty
      * list if the file does not exist
      */
+    @Override
     public List<Accessory> loadAll() {
         List<Accessory> accessories = new ArrayList<>();
         File file = new File(filePath);

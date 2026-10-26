@@ -15,7 +15,7 @@ import java.util.List;
  * category, and bulk purchase promotions to and from a
  * CSV-formatted text file.
  */
-public class PromotionRepository {
+public class PromotionRepository implements PromotionStorage {
     private String filePath;
     /**
      * Creates a new PromotionRepository using the default file path.
@@ -33,6 +33,7 @@ public class PromotionRepository {
      *
      * @param promotions the list of promotions to save
      */
+    @Override
     public void saveAll(List<Promotion> promotions) {
         File file = new File(filePath);
         File parent = file.getParentFile();
@@ -88,6 +89,7 @@ public class PromotionRepository {
      * @return the list of promotions loaded from the file, or an empty
      * list if the file does not exist
      */
+    @Override
     public List<Promotion> loadAll() {
         List<Promotion> promotions = new ArrayList<>();
         File file = new File(filePath);
