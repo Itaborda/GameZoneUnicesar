@@ -2,13 +2,15 @@
 
 ## 1. Purpose
 
-This document presents the current design based on the Technical Leader's preliminary audit and a proposed design for addressing findings V-01 and V-03.
+This document records the preliminary design of the Sales and UI integration modules and a conceptual target design for potential GRASP corrections.
 
-The proposed design is conceptual. The classes and interfaces introduced in the target diagram must not be considered implemented until the team approves and develops them.
+The current-design diagram represents the relevant responsibilities and dependencies identified during the audit. The target-design diagram is a proposal, not a statement of implemented architecture. Any proposed class, interface, or dependency must be validated against the source code and approved by the team before implementation.
 
-## 2. Before Refactoring — Current Design
+Product and People module corrections have been recorded in the `feature/grasp-refactor` branch. Those changes must be represented separately from the proposed Sales and UI changes.
 
-The following diagram summarizes the relevant classes and dependencies identified during the Technical Leader's review. It focuses on the sale workflow and its integration with the user interface and inventory modules.
+## 2. Before Refactoring — Audited Sales and UI Design
+
+The following diagram summarizes the relevant classes and dependencies identified during the Technical Leader's preliminary review. It focuses on sales registration and its integration with the console UI and inventory modules.
 
 ```mermaid
 classDiagram
@@ -50,24 +52,26 @@ classDiagram
     ConsoleMenu --> WarrantyService : warranty operations
 
     SaleService --> SaleRepository : persists sales
-    SaleService --> ProductService : validates and updates products
-    SaleService --> AccessoryService : validates and updates accessories
-    SaleService --> PromotionService : finds best promotion
-    SaleService --> WarrantyService : assigns warranties
+    SaleService --> ProductService : product operations
+    SaleService --> AccessoryService : accessory operations
+    SaleService --> PromotionService : promotion selection
+    SaleService --> WarrantyService : warranty assignment
     SaleService --> Sale : registers
 ```
 
-### Observed design concerns
+### Preliminary findings
 
-- **V-01 — High Cohesion:** `ConsoleMenu` contains interaction flows for multiple independent modules.
-- **V-02 — Low Coupling:** Sale-related checks are distributed between the UI and service layers.
-- **V-03 — Polymorphism / Protected Variations:** `SaleService` uses concrete-type checks to select product or accessory inventory operations.
+The following findings originated in the Technical Leader's preliminary audit. Their identifiers must be reconciled with the Developer 1 and Developer 2 reports before the consolidated audit is finalized.
 
-These findings remain subject to final team validation.
+- **Leader V-01 — High Cohesion:** `ConsoleMenu` handles interaction flows for several independent modules.
+- **Leader V-02 — Low Coupling:** Sale-related checks may be duplicated across the UI and service layers.
+- **Leader V-03 — Polymorphism / Protected Variations:** `SaleService` uses concrete-type checks to choose between product and accessory inventory operations.
 
-## 3. After Refactoring — Proposed Design
+These findings remain subject to team validation. A proposed correction must address the demonstrated design problem while preserving external behavior.
 
-The following diagram illustrates one possible target design. It proposes extracting module-specific UI components and introducing a common inventory-handling abstraction.
+## 3. After Refactoring — Conceptual Target Design
+
+The following diagram is a candidate design, not a record of implemented classes. The team must confirm whether a shared inventory abstraction is justified and whether extracting module-specific UI components is within the approved correction scope.
 
 ```mermaid
 classDiagram
@@ -102,44 +106,56 @@ classDiagram
     class WarrantyService
 
     Main --> ConsoleMenu : starts
-    ConsoleMenu --> ProductMenu : delegates
-    ConsoleMenu --> PeopleMenu : delegates
-    ConsoleMenu --> SaleMenu : delegates
-    ConsoleMenu --> ReturnMenu : delegates
-    ConsoleMenu --> PromotionMenu : delegates
-    ConsoleMenu --> AccessoryMenu : delegates
-    ConsoleMenu --> WarrantyMenu : delegates
+    ConsoleMenu --> ProductMenu : proposed delegation
+    ConsoleMenu --> PeopleMenu : proposed delegation
+    ConsoleMenu --> SaleMenu : proposed delegation
+    ConsoleMenu --> ReturnMenu : proposed delegation
+    ConsoleMenu --> PromotionMenu : proposed delegation
+    ConsoleMenu --> AccessoryMenu : proposed delegation
+    ConsoleMenu --> WarrantyMenu : proposed delegation
 
-    SaleMenu --> SaleService : submits sale
+    SaleMenu --> SaleService : proposed sale submission
     SaleService --> SaleRepository : persists sales
-    SaleService --> InventoryHandler : inventory operations
-    InventoryHandler <|.. ProductInventoryHandler : implements
-    InventoryHandler <|.. AccessoryInventoryHandler : implements
-    SaleService --> PromotionService : promotion rules
-    SaleService --> WarrantyService : warranty rules
+    SaleService --> InventoryHandler : proposed inventory operations
+    InventoryHandler <|.. ProductInventoryHandler : proposed implementation
+    InventoryHandler <|.. AccessoryInventoryHandler : proposed implementation
+    SaleService --> PromotionService : promotion selection
+    SaleService --> WarrantyService : warranty assignment
     SaleService --> Sale : registers
 ```
 
+### Target-design constraints
+
+- Do not treat `InventoryHandler`, `ProductInventoryHandler`, `AccessoryInventoryHandler`, or the proposed menu classes as implemented unless their source files and dependencies are verified.
+- Agree on interface signatures and module ownership before modifying shared code.
+- Review the return workflow as well as sale registration before finalizing a common inventory abstraction.
+- Keep separate findings when they represent distinct causes or responsibilities, even if they affect the same classes.
+
 ## 4. Relationship Between Findings and Proposed Changes
 
-| Finding | Proposed change | Intended benefit |
+| Preliminary finding | Proposed direction | Validation required |
 |---|---|---|
-| V-01 | Extract module-specific UI components while keeping `ConsoleMenu` as the entry point. | Improve High Cohesion and make UI changes easier to maintain. |
-| V-02 | Keep authoritative business validation in the service layer and limit the UI to interaction and presentation responsibilities. | Reduce duplicated rules and unnecessary coupling. |
-| V-03 | Evaluate a common inventory-handling interface for products and accessories. | Apply Polymorphism and reduce dependence on concrete inventory categories. |
+| Leader V-01 — High Cohesion | Consider extracting module-specific UI responsibilities from `ConsoleMenu`. | Confirm scope, ownership, and preservation of menu behavior. |
+| Leader V-02 — Low Coupling | Keep authoritative business validation in the service layer and avoid redundant business rules in the UI. | Compare the actual validation responsibilities and error behavior. |
+| Leader V-03 — Polymorphism / Protected Variations | Evaluate a common inventory-handling abstraction or another design that removes unnecessary concrete-type branching. | Review sale and return flows and coordinate with the Product and Accessory module owners. |
+
+These are preliminary references, not final consolidated IDs. The consolidated audit must assign unique identifiers and retain references to the original reports.
 
 ## 5. Refactoring Constraints
 
-1. Preserve existing menu options, Spanish messages, and user workflows.
-2. Preserve sale calculations, promotions, warranty assignment, inventory updates, and return behavior.
-3. Avoid introducing unnecessary abstractions before reviewing the complete codebase.
-4. Confirm the exact method signatures and dependencies before implementing the proposed classes.
-5. Update this diagram after the team agrees on the final design and again after implementation.
+1. Preserve menu options, Spanish messages, customer and seller selection, and existing user workflows.
+2. Preserve sale calculations, promotion selection, warranty assignment, stock changes, return processing, and displayed totals.
+3. Do not introduce abstractions solely to satisfy a pattern name; demonstrate the design problem and the benefit of the proposed correction.
+4. Confirm class responsibilities, method signatures, and dependencies against the source code before implementation.
+5. Coordinate changes that cross module boundaries with the affected developers.
+6. Update the diagrams after approving the target design and again after implementation.
+7. Record actual compilation and regression-test results without marking unexecuted checks as passed.
 
-## 6. Implementation Status
+## 6. Implementation and Review Status
 
-- Current-design diagram: preliminary, based on the Technical Leader's review.
-- Target-design diagram: proposed; not yet implemented.
-- Developer 1's Product module audit: pending.
-- Developer 2's People module audit: pending.
-- Final architecture approval: pending team review.
+- Current Sales and UI diagram: preliminary; must be checked against the audited source version.
+- Target Sales and UI diagram: conceptual proposal; approval and implementation remain to be verified.
+- Product and People audit reports: available for consolidation.
+- Product persistence, category handling, `ProductService` dependency injection, and `PersonStorage` abstraction: corrections are recorded in `feature/grasp-refactor`; each must be traced to its validated finding.
+- Final consolidated findings and nine-pattern verdicts: require team validation.
+- Final architecture approval and regression validation: pending documented evidence.

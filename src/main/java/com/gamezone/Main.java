@@ -36,7 +36,7 @@ public class Main {
 
                 // Services
                 ProductService productService =
-                        new ProductService();
+                        new ProductService(productRepository);
 
                 AccessoryService accessoryService =
                         new AccessoryService(accessoryRepository);

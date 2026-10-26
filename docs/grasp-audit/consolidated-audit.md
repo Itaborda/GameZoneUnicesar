@@ -88,45 +88,76 @@ The findings currently recorded in this section originate from the Technical Lea
 
 **Identifier note:** V-01, V-02, and V-03 are provisional identifiers from the Technical Leader's report. They must be reconciled with identifiers in Developer 1's and Developer 2's reports before the final consolidated audit is approved.
 
-## 5. Findings Submitted by Other Developers — Pending Consolidation
 
-### Developer 1 — Products and related modules
+## 5. Findings Submitted by Other Developers
 
-- **Assigned scope:** Product, VideoGame, Console, ProductRepository, ProductService, and the additional classes listed in the individual report.
-- **Report status:** Integrated into `develop`; team validation pending.
-- **Required integration:** Review the evidence, consequences, proposed solutions, affected classes, and cross-module dependencies. Reconcile provisional finding IDs with the consolidated list.
+The following findings were submitted in the individual audit reports. Their original identifiers are retained for traceability. They are not final consolidated identifiers until the team completes deduplication and validation.
 
-### Developer 2 — People and related modules
+### Developer 1 — Products and Related Modules
 
-- **Assigned scope:** Person, Customer, Seller, PersonRepository, PersonService, and the additional classes listed in the individual report.
-- **Report status:** Integrated into `develop`; team validation pending.
-- **Required integration:** Review the evidence, consequences, proposed solutions, affected classes, and cross-module dependencies. Reconcile provisional finding IDs with the consolidated list.
+| Original ID | Pattern | Area | Finding summary |
+|---|---|---|---|
+| Developer 1 V-01 | Low Coupling | Products | `ProductService` dependency on its concrete repository and legacy construction path. |
+| Developer 1 V-02 | Polymorphism | Products and promotions | Product and promotion behavior involving type-specific logic and category handling. |
+| Developer 1 V-03 | Protected Variations | Products | Product-related variation and serialization concerns requiring review against V-02. |
+
+**Recorded corrections:** The refactoring branch contains commits for `ProductService` dependency injection, product CSV mapper strategy, repository serialization delegation, `ProductCategory`, category declaration in product subclasses, and category-based discount matching.
+
+These commits must be individually checked against the evidence and scope of the original findings. The existence of a correction does not, by itself, establish final audit approval or regression-test completion.
+
+### Developer 2 — People, Accessories, Promotions, Returns, Warranties, and Validation
+
+| Original ID | Pattern | Area | Finding summary |
+|---|---|---|---|
+| Developer 2 V-01 | Low Coupling | People | `PersonService` depends directly on concrete repository construction and a hardcoded path. |
+| Developer 2 V-02 | Polymorphism | People | `PersonRepository` uses concrete-type checks and role literals for persistence. |
+| Developer 2 V-03 | Polymorphism | Accessories | `AccessoryRepository` uses concrete-type checks and type strings for persistence. The source report contains a malformed identifier. |
+| Developer 2 V-04 | Polymorphism | Accessories | `AccessoryService.listAccessoriesByType()` uses type strings and concrete-type checks. |
+| Developer 2 V-05 | Low Coupling | Accessories | `AccessoryService` initializes a concrete repository and then replaces it through constructor injection; paths also differ. |
+| Developer 2 V-06 | Information Expert | Accessories | Stock arithmetic is performed in `AccessoryService` rather than being encapsulated in the relevant domain responsibility. |
+| Developer 2 V-07 | Polymorphism | Promotions | `PromotionRepository` uses concrete-type checks and type strings for persistence. |
+| Developer 2 V-08 | Low Coupling | Promotions | `PromotionService` initializes a concrete repository before replacing it through constructor injection. |
+| Developer 2 V-09 | Information Expert | Promotions | Category-discount target knowledge is duplicated in `PromotionService` and `CategoryDiscount`. |
+| Developer 2 V-10 | Low Coupling | Returns | `ReturnRepository` depends on services to resolve data while loading persisted returns. |
+| Developer 2 V-11 | Information Expert | Returns and warranties | Sale lookup by ID is repeated across return and warranty responsibilities. |
+| Developer 2 V-12 | Polymorphism | Returns | `ReturnService.registerReturn()` uses concrete-type checks to select warranty and inventory behavior. |
+| Developer 2 V-13 | High Cohesion | Returns | Monthly financial reporting responsibilities are mixed into `ReturnService`. |
+| Developer 2 V-14 | Low Coupling | Returns | `ReturnService` retains a `SaleRepository` dependency reported as unused. |
+| Developer 2 V-15 | Polymorphism | Warranties | `WarrantyService` uses concrete-type checks and type strings for warranty persistence. |
+| Developer 2 V-16 | High Cohesion | Exceptions and validation | Validation and exception decisions are distributed across several services rather than consistently delegated to appropriate validation responsibilities. |
+
+The identifiers above refer to the individual report. Where the original report uses malformed identifiers, the consolidated audit must preserve the source reference and record the normalized reference agreed by the team.
+
+### 5.1 Cross-Module Findings Requiring Joint Review
+
+The following relationships are candidates for consolidation, not automatic merges:
+
+- **Leader V-03 and Developer 2 V-12:** Both involve concrete-type checks related to inventory operations. Review the sale and return workflows to determine whether they share one underlying design problem or represent separate responsibilities.
+- **Leader V-02 and Developer 2 V-11:** Both involve sale-related responsibilities, but duplicated UI validation and repeated sale lookup are different potential causes. Do not merge them without evidence.
+- **Developer 1 V-02/V-03 and Developer 2 V-03/V-07/V-15:** Review the persistence strategies and type-specific branches in each repository. Similar use of `instanceof` does not necessarily mean the same finding.
+- **Developer 1 V-01 and Developer 2 V-01/V-05/V-08:** These findings concern dependencies in different services and must be evaluated independently unless a shared underlying cause is demonstrated.
+- **Developer 2 V-10 and V-14:** One concerns repository-to-service coupling; the other concerns a reported unused dependency. They should remain separate unless the code review establishes that they describe the same design problem.
+- **Developer 2 V-04 and Developer 1's accessory-related scope:** Coordinate the review because the accessory hierarchy and service behavior cross module boundaries.
+
+The Technical Leader coordinates these reviews with the responsible developers. Final identifiers, pattern classifications, owners, and accepted solutions must be recorded only after team validation.
 
 ## 6. Cross-Module Review and Deduplication
 
 Before approving the final audit, the team must:
 
-1. Verify each finding against the relevant audited code version.
-2. Review the evidence supplied in each individual report.
-3. Assign a unique identifier to each distinct, accepted finding.
-4. Merge findings that describe the same underlying design problem, preserving their original sources.
-5. Record the responsible owner and any cross-module dependencies.
-6. Separate GRASP design findings from functional defects and compilation issues.
-7. Establish a final, evidence-based verdict for each of the nine GRASP patterns.
-8. Confirm coverage of all assigned classes and responsibilities.
+1. Verify every finding against the same identified baseline commit.
+2. Confirm that each finding contains observable code evidence, a design explanation, consequences, and a proposed correction.
+3. Preserve each individual report's original identifier as a source reference.
+4. Assign unique consolidated identifiers only after deciding which findings are distinct.
+5. Record merged source references when multiple reports describe the same underlying design problem.
+6. Keep separate findings when their responsibilities, causes, or consequences differ.
+7. Assign an owner and identify any affected modules for every accepted finding.
+8. Distinguish GRASP design violations from functional defects and implementation issues.
+9. Set one evidence-based verdict for each of the nine GRASP patterns: Violation, Correct, or Not Applicable. Any remaining pending decision must be explicitly marked as unresolved during the preliminary stage.
+10. Link implemented corrections to their corresponding validated findings and record actual compilation and regression-test results.
+11. Confirm that proposed changes preserve existing externally observable behavior.
 
-## 7. Out-of-Scope Functional Issues
-
-Functional defects must be documented separately from GRASP findings. They must not be classified as GRASP violations without supporting design evidence.
-
-Items requiring verification include:
-
-- Whether warranty costs are counted twice when calculating displayed sale totals.
-- Whether monthly sales calculations consistently account for discounts.
-- Whether repository persistence failures can leave in-memory data inconsistent with stored data.
-- Whether unresolved sale or product references are handled safely when loading returns.
-
-These are verification items, not confirmed final findings. The team must determine whether they fall outside the scope of the GRASP refactoring.
+The audit remains provisional until the team has completed these steps and recorded the evidence supporting its conclusions.
 
 ## 8. Refactoring and Validation Plan
 
