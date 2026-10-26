@@ -39,6 +39,12 @@ Record each implemented correction in the following format.
 | Date    | Class or component | Change | Finding ID | GRASP pattern | Commit | Pull request | Owner |
 |---------|---|---|---|---|---|---|---|
 | Pending | None | No corrections recorded yet | Pending | Pending | Pending | Pending | Pending |
+| 2026-10-25 | `ProductService` | The repository is received through the constructor; fields are private and final. A deprecated no-argument constructor keeps the previous path (`data/product.csv`) until `Main` injects the repository. | V-01 | Low Coupling | `refactor: inject ProductRepository into ProductService (V-01)` / `<hash>` | `<n>` | Developer 1 |
+| 2026-10-25 | `ProductCsvMapper`, `VideoGameCsvMapper`, `ConsoleCsvMapper` (new) | One mapper per kind of product, with the same line format as before. | V-02 | Polymorphism | `refactor: add ProductCsvMapper strategy for product serialization (V-02)` / `<hash>` | `<n>` | Developer 1 |
+| 2026-10-25 | `ProductRepository` | `saveAll` and `findAll` use the mappers instead of `instanceof` and literal type markers; record encoding and decoding are in one place (V-03, centralization only). File format unchanged. | V-02, V-03 | Polymorphism, Protected Variations | `refactor: delegate ProductRepository serialization to product mappers (V-02)` / `<hash>` | `<n>` | Developer 1 |
+| 2026-10-25 | `ProductCategory` (new) | Enum with `VIDEOGAME`, `CONSOLE` and `ACCESSORY` and a case-insensitive `fromName`. | V-02 | Polymorphism | `refactor: add ProductCategory enum (V-02)` / `<hash>` | `<n>` | Developer 1 |
+| 2026-10-25 | `Product`, `VideoGame`, `Console`, `Accessory` | `Product.getCategory()` is abstract and each product type returns its own category. | V-02 | Polymorphism | `refactor: declare the category in each Product subclass (V-02)` / `<hash>` | `<n>` | Developer 1 |
+| 2026-10-25 | `CategoryDiscount` | `belongsToTargetCategory` compares `product.getCategory()` with the target category; the `instanceof` chain was removed. The target category is still text in the constructor, getter, setter and file. | V-02 | Polymorphism | `refactor: match CategoryDiscount target through Product.getCategory (V-02)` / `<hash>` | `<n>` | Developer 1 |
 
 ## 4. Validation Rules
 
@@ -59,3 +65,16 @@ Record each implemented correction in the following format.
 - **Final compilation:** Pending.
 - **Final manual regression:** Pending.
 - **Outstanding deviations:** Pending review.
+
+## 6. Developer 1 — Findings Left Out of Scope
+
+Functional defects found in the code of Developer 1. Correcting them would change what the user sees or what is stored, so they are not fixed in this requirement.
+
+ID	Where	Defect	Justification
+F-01	Main, ProductService	The seed file Data/Products.csv is never loaded; the service uses data/product.csv.	Reading the other file changes the products shown at startup. The injection of V-01 keeps data/product.csv.
+F-02	ProductRepository	Commas inside fields, malformed lines and unknown product kinds are not handled (the part of V-03 about escaping).	Changes files and errors.
+F-03	ProductService.registerProduct	ProductValidator.validateProductData is never called.	Would reject data that is accepted today.
+
+## 7. Developer 1 — Non-regression Evidence
+
+Besides the manual tests of section 2, I compared a scripted run of the menu on develop (before the first correction) with the same run after each of the six code commits. The run registers products, accessories, customers and promotions (percentage, category and bulk), makes sales with and without extended warranty, a sale without stock, a return, queries warranties, lists, and starts the application a second time to reload the files. The output (1,190 lines) and the data files (29 lines) were identical in the six comparisons. A class-level check of 107 lines (product file read and write, stock messages, category discounts with different spellings, refunds and canBeReturned) was also identical before and after.

@@ -92,3 +92,11 @@
 **Question or query:** I consulted ChatGPT for guidance on organizing my GRASP audit report for Requirement 7, Phase 1. I asked for help structuring the assigned modules, presenting the GRASP assessments clearly, documenting potential design issues, and checking whether the orienting questions were adequately addressed in the report.
 **Summary of response:** ChatGPT provided guidance on organizing the report into Markdown sections and explained how to present the audit scope, GRASP pattern assessments, module-specific observations, findings, and orienting questions. It also helped review the wording and structure of the provisional findings concerning Low Coupling, Polymorphism, and Protected Variations, and highlighted the need to distinguish confirmed violations from observations requiring further verification. The guidance emphasized that proposed solutions should be coordinated with the Technical Leader and that the audit should remain within the boundaries of Phase 1.
 **Decision made:** I used the guidance to organize and refine my audit documentation, while retaining responsibility for the report's content and the decisions about which observations to include. I kept the findings provisional so they could be checked against the actual code and consolidated by the Technical Leader. No Java source code changes or refactoring were performed as part of this Phase 1 audit.
+
+
+## 2026-10-25 - Non-regression verification
+
+**Tool:** Claude
+**Question or query:** How to show that every menu operation works as before the corrections.
+**Summary of response:** Claude built a scripted run of the menu with a restart to reload the files, recorded the output and data files of develop as the reference, and compared them after each commit. It also wrote a class-level check for cases the menu does not reach (malformed files, exception messages, boundary percentages, dates). All comparisons were identical. 
+**Decision made:** I kept the scenario and the results in docs/grasp-refactor-log.md, and I will run mvn clean compile and test the affected menu options by hand before each Pull Request.
