@@ -26,6 +26,10 @@ calculateMonthlySales(), calculateMonthlyReturns()
 - listActiveWarranties(), listWarrantiesExpiringSoon(), cancelWarranties(),
 persist(), and the private helpers resolveAll(), generateId() and
 findSaleById()
+### Exceptions and validations module (Requirement 6)
+- Use of exceptions and validators in PersonService, PersonRepository, AccessoryService, AccessoryRepository, PromotionService,
+PromotionRepository, ReturnService, ReturnRepository, WarrantyService and
+WarrantyRepository.
 
 ## 1. Information Expert
 ### Person module
@@ -103,7 +107,10 @@ WarrantyService.findSaleById() repeats the sale lookup owned by the sales
 module. Correct usage: findWarrantyByProduct(), listActiveWarranties() and
 cancelWarranties() ask each warranty (isActive, getEndDate,
 getAdditionalCost) instead of computing those values themselves
-
+#### Exceptions and validations (Requirement 6)
+Verdict for this module: not applicable
+the use of exceptions and validators does not create objects or select behavior by
+type
 ## 2. Creator
 ### Person module
 Verdict: violation (see V-01)
@@ -132,6 +139,10 @@ Verdict for this module: correct.
 WarrantyService creates BasicWarranty and ExtendedWarranty objects
 (assignBasicWarranty(), assignExtendedWarranty(), resolveAll()) because it
 records them in its list and has the data needed to initialize them.
+#### Exceptions and validations (Requirement 6)
+Verdict for this module: not applicable
+the use of exceptions and validators does not create objects or select behavior by
+type
 
 ## 3. Controller
 ### Person module
@@ -152,6 +163,10 @@ These classes do not receive system events; ConsoleMenu does.
 #### Warranties (Requirement 4)
 Verdict for this module: not applicable.
 These classes do not receive system events; ConsoleMenu does.
+#### Exceptions and validations (Requirement 6)
+Verdict for this module: not applicable
+the use of exceptions and validators does not create objects or select behavior by
+type
 
 ## 4. Low Coupling
 ### Person module
@@ -249,6 +264,10 @@ WarrantyRepository handles only raw rows of text and depends on no service
 or other repository, as its own documentation states. WarrantyService
 depends on ProductService and SaleRepository, which are in lower or
 equal layers, and does not create a dependency cycle with SaleService
+#### Exceptions and validations (Requirement 6)
+Verdict for this module: not applicable
+the use of exceptions and validators does not create objects or select behavior by
+type
 
 ## 5. High Cohesion
 ### Person module
@@ -290,6 +309,25 @@ Verdict for this module: correct.
 WarrantyService is focused on warranties (assign, search, list, cancel). The
 conversion between warranties and file rows is kept in private helpers; the
 type checks inside those helpers are covered by V-15.
+#### Exceptions and validations (Requirement 6)
+Verdict for this module: violation .
+##### V-16
+- **ID:** V-16
+- **Pattern:** High Cohesion
+- **Module:** Exceptions and validations (Requirement 6)
+- **Evidence:** inline validations that throw IllegalArgumentException:
+AccessoryService.updateStock() and restoreStock() (lines 121-131 and
+150-156), PromotionService.registerCategoryDiscount() (lines 57-66) and
+ReturnService.registerReturn() (lines 73-78 and 90-92).
+- **Explanation:** These services validate inline and throw a generic
+exception, while the services refactored in Requirement 6 delegate to the
+validators and throw typed exceptions.
+- **Consequence:** Validation rules are scattered across the services and
+error handling is inconsistent; ConsoleMenu needs a generic fallback catch.
+- **Proposed solution:** Move these checks to validators and throw the typed
+exceptions.
+- **Other developer's code:** Yes. Developer 1 (validators package) and
+Technical Leader (ConsoleMenu catch blocks).
 
 ## 6. Polymorphism
 ### Person module
@@ -430,6 +468,10 @@ Verdict for this module: violation.
 - **Other developer's code:** No.
 Correct usage: cancelWarranties() uses w.getAdditionalCost() and
 listActiveWarranties() uses w.isActive() without checking the warranty type.
+#### Exceptions and validations (Requirement 6)
+Verdict for this module: not applicable
+the use of exceptions and validators does not create objects or select behavior by
+type
 
 ## 7. Pure Fabrication
 ### Person module
@@ -455,6 +497,11 @@ of ReturnRepository is covered by V-10 under Low Coupling.
 Verdict for this module: correct.
 WarrantyRepository and WarrantyService keep file access and conversion
 logic out of the Warranty hierarchy.
+#### Exceptions and validations (Requirement 6)
+Verdict for this module: correct.
+PersonService.registerCustomer() delegates the checks to PersonValidator
+instead of validating inline, keeping validation outside the service and the
+model.
 
 ## 8. Indirection
 ### Person module
@@ -478,6 +525,10 @@ Verdict for this module: correct.
 The raw rows (type, id, product id, sale id, dates) work as an intermediary
 between WarrantyRepository and the domain: the repository does not know the
 Product or Sale classes, and WarrantyService resolves the references.
+#### Exceptions and validations (Requirement 6)
+Verdict for this module: correct.
+The repositories refactored in Requirement 6 translate IOException into
+PersistenceException, so the upper layers do not depend on java.io.
 
 ## 9. Protected Variations
 ### Person module

@@ -12,14 +12,8 @@ import java.util.List;
  * This class is responsible for saving and loading customers and
  * sellers to and from a CSV-formatted text file.
  */
-public class PersonRepository {
+public class PersonRepository implements PersonStorage {
     private String filePath;
-    /**
-     * Creates a new PersonRepository using the default file path.
-     */
-    public PersonRepository() {
-        this.filePath = "data/person.csv";
-    }
 
     /**
      * Creates a new repository that reads from and writes to the
@@ -39,6 +33,7 @@ public class PersonRepository {
      *@throws PersistenceException if the file be written
      * @param person the list of people to save
      */
+    @Override
     public void save (List<Person> person){
         File file = new File(filePath); File parent = file.getParentFile();
         if(parent!=null && !parent.exists()){
@@ -82,6 +77,7 @@ public class PersonRepository {
      * @throws PersistenceException if the file be read
      * @return the list of people loaded from the file
      */
+    @Override
     public List<Person> findAll(){
         List<Person> person = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {

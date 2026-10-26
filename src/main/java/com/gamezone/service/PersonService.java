@@ -5,8 +5,7 @@ import com.gamezone.exceptions.InvalidDataException;
 import com.gamezone.model.Customer;
 import com.gamezone.model.Person;
 import com.gamezone.model.Seller;
-import com.gamezone.persistence.PersonRepository;
-import com.gamezone.persistence.ProductRepository;
+import com.gamezone.persistence.PersonStorage;
 import com.gamezone.validation.PersonValidator;
 
 import java.util.ArrayList;
@@ -14,21 +13,21 @@ import java.util.List;
 /**
  * Provides the business logic for managing people (customers and
  * sellers) in the GameZone system. This service is the only class
- * authorized to interact with {@link PersonRepository} for
+ * authorized to interact with {@link PersonStorage} for
  * persistence operations, keeping the current list of people in
  * memory to avoid reading the file on every operation.
  */
 public class PersonService {
-    PersonRepository personRepository = new PersonRepository("data/product.csv");
+    private final PersonStorage personRepository;
     private List<Person> person;
     /**
-     * Creates a new person service backed by the given repository
+     * Creates a new person service backed by the given storage
      * and initialized with the given list of people already loaded.
      *
-     * @param personRepository the repository used to persist people
+     * @param personRepository the storage used to persist people
      * @param person           the initial list of people managed by this service
      */
-    public PersonService(PersonRepository personRepository, List<Person> person) {
+    public PersonService(PersonStorage personRepository, List<Person> person) {
         this.personRepository = personRepository;
         this.person = person;
     }
