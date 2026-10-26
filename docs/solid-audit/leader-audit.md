@@ -49,6 +49,35 @@ For each SOLID principle, record the class or method reviewed, the exact code ev
 - **Verdict:** Pending review
 - **Justification:**
 
+### SRP — Single Responsibility Principle
+
+**Class analyzed:** `SaleService`
+
+**Methods analyzed:** `registerSale()` and `findAll()`
+
+**Verdict:** Pending verification.
+
+**Evidence:**
+
+The `registerSale()` method coordinates several steps in the sales registration process, including sale validation, product and accessory lookup, stock validation, promotion application, warranty assignment, inventory updates, and sale persistence.
+
+Relevant operations include:
+- `SaleValidator.validateSaleData(...)`
+- `promotionService.findBestPromotionFor(sale)`
+- `warrantyService.assignBasicWarranty(...)`
+- `warrantyService.assignExtendedWarranty(...)`
+- `productService.updateStock(...)`
+- `accessoryService.updateStock(...)`
+- `salePersistence.save(sale)`
+
+**Analysis:**
+
+Although these operations participate in the same sales registration workflow, it is necessary to determine whether `SaleService` only coordinates that workflow or also assumes responsibilities that should belong to other components. The presence of multiple steps in one method does not, by itself, prove an SRP violation.
+
+**Consequence:** Pending analysis.
+
+**Proposed solution:** Pending verification of the finding.
+
 ### 3.2 Open/Closed Principle (OCP)
 
 - **Class/method reviewed:**

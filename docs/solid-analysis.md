@@ -2,35 +2,23 @@
 
 ## 1. Criteria for Evaluating SOLID Principles
 
-Explain the criteria used to classify each principle as `violation`, `correct`, or `not applicable`.
-
-For each finding, include the class or method, code evidence, explanation, consequences, and proposed solution.
+We will evaluate each principle based on the actual code and classify it as `violation`, `correct`, or `not applicable`. Each finding must include evidence, an explanation, its consequences, and a possible solution.
 
 ## 2. Findings at the Boundaries Between Developers
 
-Explain how findings involving code owned by more than one developer were identified, documented, and assigned for correction.
-
-Include a concrete example if one was found. If no boundary findings were identified, explain how this was verified.
+We will review findings that involve more than one developer's code and coordinate their corrections. Any examples will be documented after reviewing the individual reports.
 
 ## 3. Relationship Between SOLID and GRASP Findings
 
-Compare the SOLID audit findings with the findings documented during Requirement 7.
-
-- Did any SOLID violations remain in code previously refactored for GRASP?
-- Did any GRASP correction also resolve a SOLID concern?
-- Include concrete finding IDs and evidence from the project.
+We will compare the SOLID findings with the previous GRASP audit to identify any remaining issues or improvements related to both principles. We will include specific evidence and finding IDs once verified.
 
 ## 4. Non-Regression Strategy
 
-Describe how existing behavior will be verified before, during, and after the refactoring.
-
-Include the operations tested, input data, expected results, and evidence collected.
+We will test the existing operations before and after refactoring to ensure that menus, business rules, and data remain unchanged. We will record the inputs, expected results, actual results, and compilation evidence.
 
 ## 5. Order of Corrections and Team Coordination
 
-Explain how corrections will be prioritized and how the team will coordinate changes when a finding affects code owned by multiple developers.
-
-Identify dependencies between corrections when applicable.
+We will prioritize confirmed violations, assign each correction to the responsible developer, and coordinate changes involving multiple modules. Each correction will be reviewed and tested before integration.
 
 ## 6. References
 
