@@ -77,3 +77,4 @@ F-03	ProductService.registerProduct	ProductValidator.validateProductData is neve
 ## 7. Developer 1 — Non-regression Evidence
 
 Besides the manual tests of section 2, I compared a scripted run of the menu on develop (before the first correction) with the same run after each of the six code commits. The run registers products, accessories, customers and promotions (percentage, category and bulk), makes sales with and without extended warranty, a sale without stock, a return, queries warranties, lists, and starts the application a second time to reload the files. The output (1,190 lines) and the data files (29 lines) were identical in the six comparisons. A class-level check of 107 lines (product file read and write, stock messages, category discounts with different spellings, refunds and canBeReturned) was also identical before and after.
+
