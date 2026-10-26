@@ -1,18 +1,19 @@
 package com.gamezone.persistence;
 import com.gamezone.exceptions.PersistenceException;
-import com.gamezone.model.Customer;
 import com.gamezone.model.Person;
-import com.gamezone.model.Seller;
+
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 /**
  * Handles file-based persistence for {@link Person} objects.
- * This class is responsible for saving and loading customers and
- * sellers to and from a CSV-formatted text file.
+ * This class is responsible for reading and writing the CSV file,
+ * while the conversion of each person to and from a line is
+ * delegated to {@link PersonCsvMapper}.
  */
 public class PersonRepository implements PersonStorage {
+    private final PersonCsvMapper mapper = new PersonCsvMapper();
     private String filePath;
 
     /**
@@ -27,11 +28,11 @@ public class PersonRepository implements PersonStorage {
 
     /**
      * Saves the given list of people to the file, overwriting its
-     * previous content. Each line represents one person, with the
-     * columns depending on whether the person is a customer or a
-     * seller.
-     *@throws PersistenceException if the file be written
+     * previous content. Each line is produced by the mapper according
+     * to the role of the person.
+     *
      * @param person the list of people to save
+     * @throws PersistenceException if the file cannot be written
      */
     @Override
     public void save (List<Person> person){
@@ -43,39 +44,22 @@ public class PersonRepository implements PersonStorage {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write("role,id,name,phone,email,codeEmployee,shift");
             writer.newLine();
-            for(Person p: person){
-                String line="";
-                if (p instanceof Customer) {
-                    Customer c = (Customer) p;
-                    line = c.getRole() + ","
-                            + c.getId() + ","
-                            + c.getName() + ","
-                            + c.getPhone() + ","
-                            + c.getEmail() + ", ,";
-                } else if (p instanceof Seller) {
-                    Seller s = (Seller) p;
-                    line= s.getRole() + ","
-                            + s.getId() + ","
-                            + s.getName() + ","
-                            + s.getPhone() + ", ,"
-                            + s.getCodeEmployee() + ","
-                            + s.getShift();
-                }
-                writer.write(line);
+            for (Person p : person) {
+                writer.write(mapper.toLine(p));
                 writer.newLine();
-
             }
+
         } catch (IOException e) {
             throw new PersistenceException(
                     "Failed to write people to file '" + filePath + "' (operation: write)", e);
         }
     }
     /**
-     * Loads all people stored in the file and reconstructs them as
-     * {@link Customer} or {@link Seller} objects based on the role
-     * column of each line.
-     * @throws PersistenceException if the file be read
+     * Loads all people stored in the file. Each line is converted by the
+     * mapper, and lines whose role is not supported are skipped.
+     *
      * @return the list of people loaded from the file
+     * @throws PersistenceException if the file cannot be read
      */
     @Override
     public List<Person> findAll(){
@@ -85,23 +69,9 @@ public class PersonRepository implements PersonStorage {
             reader.readLine();
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",", -1);
-                String role = data[0];
-                String id = data[1];
-                String name = data[2];
-                String phone = data[3];
-
-                if (role.equals("Customer")) {
-                    String email = data[4];
-                    Customer customer = new Customer(id, name, phone, email);
-                    person.add(customer);
-
-                } else if (role.equals("Seller")) {
-                    String codeEmployee = data[5];
-                    String shift = data[6];
-
-                    Seller seller = new Seller(id, name, phone, codeEmployee, shift);
-
-                    person.add(seller);
+                Person p = mapper.fromFields(data);
+                if (p != null) {
+                    person.add(p);
                 }
             }
 

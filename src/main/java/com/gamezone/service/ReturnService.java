@@ -23,6 +23,7 @@ public class ReturnService {
     private final ProductService productService;
     private final List<Return> returns;
     private final WarrantyService warrantyService;
+    private final MonthlyBalanceReport monthlyBalanceReport;
     /**
      * Constructs a new {@code ReturnService}.
      *
@@ -32,7 +33,7 @@ public class ReturnService {
      * @param returns          the in-memory list of registered returns
      * @param accessoryService the service used to manage accessory stock
      */
-    public ReturnService(AccessoryService accessoryService, SaleRepository saleRepository, ReturnRepository returnRepository, SaleService saleService, ProductService productService, List<Return> returns, WarrantyService warrantyService) {
+    public ReturnService(AccessoryService accessoryService, SaleRepository saleRepository, ReturnRepository returnRepository, SaleService saleService, ProductService productService, List<Return> returns, WarrantyService warrantyService, MonthlyBalanceReport monthlyBalanceReport) {
         this.accessoryService = accessoryService;
         this.saleRepository = saleRepository;
         this.returnRepository = returnRepository;
@@ -40,6 +41,7 @@ public class ReturnService {
         this.productService = productService;
         this.returns = returns;
         this.warrantyService = warrantyService;
+        this.monthlyBalanceReport = monthlyBalanceReport;
     }
 
     /**
@@ -174,7 +176,7 @@ public class ReturnService {
      *         specified month and year
      */
     public double generateMonthlyBalance(int month, int year) {
-        return calculateMonthlySales(month, year) - calculateMonthlyReturns(month, year);
+        return monthlyBalanceReport.generateMonthlyBalance(month, year);
     }
     /**
      * Calculates the total sales amount for the given month and year,
@@ -186,14 +188,7 @@ public class ReturnService {
      * @return the sum of the final total of every sale registered in that month
      */
     public double calculateMonthlySales(int month, int year) {
-        double totalSales = 0.0;
-        for (Sale s : saleService.findAll()) {
-            LocalDate saleDate = LocalDate.parse(s.getDate());
-            if (saleDate.getMonthValue() == month && saleDate.getYear() == year) {
-                totalSales += s.calculateTotal();
-            }
-        }
-        return totalSales;
+        return monthlyBalanceReport.calculateMonthlySales(month, year);
     }
     /**
      * Calculates the total refunded amount for the given month and year.
@@ -203,13 +198,7 @@ public class ReturnService {
      * @return the sum of the refund amount of every return registered in that month
      */
     public double calculateMonthlyReturns(int month, int year) {
-        double totalReturns = 0.0;
-        for (Return r : returns) {
-            if (r.getReturnDate().getMonthValue() == month && r.getReturnDate().getYear() == year) {
-                totalReturns += r.getRefundAmount();
-            }
-        }
-        return totalReturns;
+        return monthlyBalanceReport.calculateMonthlyReturns(month, year);
     }
 
 }

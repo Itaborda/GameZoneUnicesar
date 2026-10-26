@@ -1,13 +1,9 @@
 package com.gamezone.persistence;
 
 import com.gamezone.model.Accessory;
-import com.gamezone.model.Cable;
-import com.gamezone.model.Controller;
-import com.gamezone.model.Memory;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 /**
  * Handles file-based persistence for {@link Accessory} objects.
@@ -16,7 +12,9 @@ import java.util.List;
  */
 public class AccessoryRepository implements AccessoryStorage {
 
-    private String filePath;
+    private final String filePath;
+    private final AccessoryCsvMapper mapper = new AccessoryCsvMapper();
+
     /**
      * Creates a new repository that reads from and writes to the
      * given file path.
@@ -46,41 +44,7 @@ public class AccessoryRepository implements AccessoryStorage {
             writer.write("type,id,title,price,stockQuantity,compatibleConsoleIds,connectionType,lengthInMeters,connectorType,capacityInGigabytes,memoryType");
             writer.newLine();
             for (Accessory a : accessories) {
-                String consoles = a.getCompatibleConsoleIds() == null
-                        ? ""
-                        : String.join(";", a.getCompatibleConsoleIds());
-                String line = "";
-                if (a instanceof Controller) {
-                    Controller c = (Controller) a;
-                    line = "CONTROLLER,"
-                            + c.getId() + ","
-                            + c.getTitle() + ","
-                            + c.getPrice() + ","
-                            + c.getStockQuantity() + ","
-                            + consoles + ","
-                            + c.getConnectionType() + ", , , ,";
-                } else if (a instanceof Cable) {
-                    Cable c = (Cable) a;
-                    line = "CABLE,"
-                            + c.getId() + ","
-                            + c.getTitle() + ","
-                            + c.getPrice() + ","
-                            + c.getStockQuantity() + ","
-                            + consoles + ", ,"
-                            + c.getLengthInMeters() + ","
-                            + c.getConnectorType() + ", ,";
-                } else if (a instanceof Memory) {
-                    Memory m = (Memory) a;
-                    line = "MEMORY,"
-                            + m.getId() + ","
-                            + m.getTitle() + ","
-                            + m.getPrice() + ","
-                            + m.getStockQuantity() + ","
-                            + consoles + ", , , ,"
-                            + m.getCapacityInGigabytes() + ","
-                            + m.getMemoryType();
-                }
-                writer.write(line);
+                writer.write(mapper.toLine(a));
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -89,7 +53,7 @@ public class AccessoryRepository implements AccessoryStorage {
     }
     /**
      * Loads all accessories stored in the file and reconstructs them as
-     * {@link Controller}, {@link Cable}, or {@link Memory} objects based
+     * controller, cable, or memory objects based
      * on the type column of each line.
      *
      * @return the list of accessories loaded from the file, or an empty
@@ -108,31 +72,9 @@ public class AccessoryRepository implements AccessoryStorage {
             reader.readLine();
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",", -1);
-                String type = data[0];
-                String id = data[1];
-                String title = data[2];
-                double price = Double.parseDouble(data[3].trim());
-                int stockQuantity = Integer.parseInt(data[4].trim());
-                List<String> compatibleConsoleIds = data[5].trim().isEmpty()
-                        ? new ArrayList<>()
-                        : new ArrayList<>(Arrays.asList(data[5].split(";")));
-
-                if (type.equals("CONTROLLER")) {
-                    String connectionType = data[6].trim();
-                    Controller controller = new Controller(id, title, price, stockQuantity, compatibleConsoleIds, connectionType);
-                    accessories.add(controller);
-
-                } else if (type.equals("CABLE")) {
-                    double lengthInMeters = Double.parseDouble(data[7].trim());
-                    String connectorType = data[8].trim();
-                    Cable cable = new Cable(id, title, price, stockQuantity, compatibleConsoleIds, lengthInMeters, connectorType);
-                    accessories.add(cable);
-
-                } else if (type.equals("MEMORY")) {
-                    int capacityInGigabytes = Integer.parseInt(data[9].trim());
-                    String memoryType = data[10].trim();
-                    Memory memory = new Memory(id, title, price, stockQuantity, compatibleConsoleIds, capacityInGigabytes, memoryType);
-                    accessories.add(memory);
+                Accessory accessory = mapper.fromFields(data);
+                if (accessory != null) {
+                    accessories.add(accessory);
                 }
             }
         } catch (IOException e) {
@@ -142,4 +84,3 @@ public class AccessoryRepository implements AccessoryStorage {
         return accessories;
     }
 }
-

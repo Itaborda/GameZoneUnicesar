@@ -55,11 +55,7 @@ public class PromotionService {
      *                                   (VIDEOGAME, CONSOLE, or ACCESSORY)
      */
     public void registerCategoryDiscount(CategoryDiscount p) {
-        String targetCategory = p.getTargetCategory();
-        boolean isAllowed = targetCategory != null
-                && ALLOWED_CATEGORY_DISCOUNT_TARGETS.contains(targetCategory.toUpperCase());
-
-        if (!isAllowed) {
+        if (ProductCategory.fromName(p.getTargetCategory()).isEmpty()) {
             throw new IllegalArgumentException(
                     "La categoría objetivo debe ser VIDEOGAME, CONSOLE o ACCESSORY."
             );

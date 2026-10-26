@@ -23,6 +23,7 @@ public class WarrantyService {
     private SaleRepository saleRepository;
     private ProductService productService;
     private WarrantyRepository warrantyRepository;
+    private final WarrantyRowMapper mapper = new WarrantyRowMapper();
     private List<Warranty> warranties;
     /**
      * Creates a new warranty service backed by the given repository,
@@ -147,22 +148,12 @@ public class WarrantyService {
         List<Sale> sales = saleRepository.findAll();
 
         for (String[] row : rows) {
-            String type = row[0];
-            String id = row[1];
-            String productId = row[2];
-            String saleId = row[3];
-            LocalDate startDate = LocalDate.parse(row[4]);
-
-            Product product = productService.findById(productId);
-            Sale sale = findSaleById(sales, saleId);
-            if (product == null || sale == null) {
-                continue;
-            }
-
-            if (type.equals("BASIC")) {
-                resolved.add(new BasicWarranty(id, product, sale, startDate));
-            } else if (type.equals("EXTENDED")) {
-                resolved.add(new ExtendedWarranty(id, product, sale, startDate));
+            Warranty warranty = mapper.fromRow(
+                    row,
+                    productService::findById,
+                    saleId -> findSaleById(sales, saleId));
+            if (warranty != null) {
+                resolved.add(warranty);
             }
         }
         return resolved;
@@ -182,27 +173,12 @@ public class WarrantyService {
     public void persist(){
         List<String[]> rows = new ArrayList<>();
         for (Warranty w : warranties) {
-            String type;
-            if (w instanceof BasicWarranty) {
-                type = "BASIC";
-            } else if (w instanceof ExtendedWarranty) {
-                type = "EXTENDED";
-            } else {
-                continue;
+            String[] row = mapper.toRow(w);
+            if (row != null) {
+                rows.add(row);
             }
-
-            String[] row = {
-                    type,
-                    w.getId(),
-                    w.getProduct().getId(),
-                    w.getSale().getSaleId(),
-                    w.getStartDate().toString(),
-                    w.getEndDate().toString()
-            };
-            rows.add(row);
         }
         warrantyRepository.saveAll(rows);
-
     }
     /**
      * Searches the given list of sales for the one matching the
