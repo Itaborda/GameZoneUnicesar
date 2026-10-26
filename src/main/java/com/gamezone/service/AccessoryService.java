@@ -4,27 +4,27 @@ import com.gamezone.model.Accessory;
 import com.gamezone.model.Cable;
 import com.gamezone.model.Controller;
 import com.gamezone.model.Memory;
-import com.gamezone.persistence.AccessoryRepository;
+import com.gamezone.persistence.AccessoryStorage;
 
 import java.util.ArrayList;
 import java.util.List;
 /**
  * Provides the business logic for managing accessories (controllers,
  * cables, and memories) in the GameZone system. This service is the
- * only class authorized to interact with {@link AccessoryRepository}
+ * only class authorized to interact with {@link AccessoryStorage}
  * for persistence operations, keeping the current list of accessories
  * in memory to avoid reading the file on every operation.
  */
 public class AccessoryService {
-    private AccessoryRepository accessoryRepository = new AccessoryRepository("data/accessories.csv");
+    private AccessoryStorage accessoryRepository;
     private List<Accessory> accessories;
     /**
      * Creates a new accessory service backed by the given repository,
      * loading the initial list of accessories from it.
      *
-     * @param accessoryRepository the repository used to persist accessories
+     * @param accessoryRepository the storage used to persist accessories
      */
-    public AccessoryService(AccessoryRepository accessoryRepository) {
+    public AccessoryService(AccessoryStorage accessoryRepository) {
         this.accessoryRepository = accessoryRepository;
         this.accessories = accessoryRepository.loadAll();
     }
