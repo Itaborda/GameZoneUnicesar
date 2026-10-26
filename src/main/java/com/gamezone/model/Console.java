@@ -94,4 +94,14 @@ public class Console extends Product{
     public String getDescription() {
         return "Titulo: " + getTitle() + ", Precio: " + getPrice() + ", Marca: " + brand + ", Modelo: " + model + ", Generacion: " + generation;
     }
+
+    /**
+     * Returns the category of a console.
+     *
+     * @return {@link ProductCategory#CONSOLE}
+     */
+    @Override
+    public ProductCategory getCategory() {
+        return ProductCategory.CONSOLE;
+    }
 }

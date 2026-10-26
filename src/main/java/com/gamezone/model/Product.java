@@ -106,4 +106,13 @@ public abstract class Product {
      * @return a string describing the product
      */
     public abstract String getDescription();
+
+    /**
+     * Returns the category this product belongs to. Each subclass
+     * declares its own category, so callers never need to check the
+     * concrete type of a product.
+     *
+     * @return the product's category
+     */
+    public abstract ProductCategory getCategory();
 }

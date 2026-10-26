@@ -94,4 +94,14 @@ public abstract class Accessory extends Product {
     public String getDescription() {
         return "Titulo: " + getTitle() + ", Precio: " + getPrice() + ", Consolas compatibles: " + compatibleConsoleIds;
     }
+
+    /**
+     * Returns the category shared by every accessory.
+     *
+     * @return {@link ProductCategory#ACCESSORY}
+     */
+    @Override
+    public ProductCategory getCategory() {
+        return ProductCategory.ACCESSORY;
+    }
 }
