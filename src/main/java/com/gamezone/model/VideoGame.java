@@ -94,4 +94,14 @@ public class VideoGame extends Product{
     public String getDescription() {
         return "Titulo: " + getTitle() + ", Plataforma: " + platform + ", Genero: " + genre + ", Clasificacion: " + ageClassification + ", Precio: " + getPrice();
     }
+
+    /**
+     * Returns the category of a video game.
+     *
+     * @return {@link ProductCategory#VIDEOGAME}
+     */
+    @Override
+    public ProductCategory getCategory() {
+        return ProductCategory.VIDEOGAME;
+    }
 }

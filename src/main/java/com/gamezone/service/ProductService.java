@@ -13,13 +13,38 @@ public class ProductService {
     /**
      * Repository used for persisting and retrieving product data.
      */
-    ProductRepository repository = new ProductRepository("data/product.csv");
+    private final ProductRepository repository;
 
     /**
      * In-memory cache of the list of products. It is loaded from the
      * repository when the service is created, so it is never {@code null}.
      */
-    private List<Product> products= repository.findAll();
+    private final List<Product> products;
+
+    /**
+     * Creates the service with the repository it must use. The repository
+     * is supplied by the caller (dependency injection), so the service does
+     * not depend on a specific storage location.
+     *
+     * @param repository the repository used to persist and load products
+     */
+    public ProductService(ProductRepository repository) {
+        this.repository = repository;
+        this.products = repository.findAll();
+    }
+
+    /**
+     * Creates the service using the legacy default repository
+     * ({@code data/product.csv}).
+     *
+     * @deprecated kept only until {@code Main} injects its own repository
+     *             through {@link #ProductService(ProductRepository)}; it will
+     *             be removed afterwards.
+     */
+    @Deprecated
+    public ProductService() {
+        this(new ProductRepository("data/product.csv"));
+    }
 
     /**
      * Registers a new product by appending it to the in-memory list

@@ -1,8 +1,6 @@
 package com.gamezone.persistence;
 import com.gamezone.exceptions.PersistenceException;
 import com.gamezone.model.Product;
-import com.gamezone.model.VideoGame;
-import com.gamezone.model.Console;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +18,15 @@ public class ProductRepository {
     private final String filePath;
 
     /**
+     * Mappers that know how to write and read each kind of product.
+     */
+    private final List<ProductCsvMapper> mappers;
+
+    /**
      * Creates a new ProductRepository using the default file path.
      */
     public ProductRepository() {
-        this.filePath = "data/product.csv";
+        this("data/product.csv");
     }
 
     /**
@@ -32,8 +35,22 @@ public class ProductRepository {
      * @param filePath the path of the file used to store the products
      */
     public ProductRepository(String filePath) {
-        this.filePath = filePath;
+        this(filePath, List.of(new VideoGameCsvMapper(), new ConsoleCsvMapper()));
     }
+
+    /**
+     * Creates a new ProductRepository with the specified file path and the
+     * mappers that handle each kind of product. Supporting a new kind of
+     * product only requires supplying one more mapper.
+     *
+     * @param filePath the path of the file used to store the products
+     * @param mappers  the mappers used to write and read each kind of product
+     */
+    public ProductRepository(String filePath, List<ProductCsvMapper> mappers) {
+        this.filePath = filePath;
+        this.mappers = mappers;
+    }
+
     /**
      * Saves all products to the configured file.
      *
@@ -52,34 +69,7 @@ public class ProductRepository {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
 
             for (Product product : products) {
-                String line = "";
-
-                if (product instanceof VideoGame) {
-                    VideoGame vg = (VideoGame) product;
-
-                    line = "VIDEOGAME,"
-                            + vg.getId() + ","
-                            + vg.getTitle() + ","
-                            + vg.getPrice() + ","
-                            + vg.getStockQuantity() + ","
-                            + vg.getPlatform() + ","
-                            + vg.getGenre() + ","
-                            + vg.getAgeClassification();
-
-                } else if (product instanceof Console) {
-                    Console c = (Console) product;
-
-                    line = "CONSOLE,"
-                            + c.getId() + ","
-                            + c.getTitle() + ","
-                            + c.getPrice() + ","
-                            + c.getStockQuantity() + ","
-                            + c.getBrand() + ","
-                            + c.getModel() + ","
-                            + c.getGeneration();
-                }
-
-                writer.write(line);
+                writer.write(toCsvLine(product));
                 writer.newLine();
             }
 
@@ -114,35 +104,10 @@ public class ProductRepository {
             while ((line = reader.readLine()) != null) {
 
                 String[] data = line.split(",");
-                String type = data[0];
+                ProductCsvMapper mapper = findMapperByTag(data[0]);
 
-                if (type.equals("VIDEOGAME")) {
-
-                    VideoGame vg = new VideoGame(
-                            data[1],                     // id
-                            data[2],                     // title
-                            Double.parseDouble(data[3]), // price
-                            Integer.parseInt(data[4]),   // stockQuantity
-                            data[5],                     // platform
-                            data[6],                     // genre
-                            data[7]                      // ageClassification
-                    );
-
-                    products.add(vg);
-
-                } else if (type.equals("CONSOLE")) {
-
-                    Console c = new Console(
-                            data[1],                     // id
-                            data[2],                     // title
-                            Double.parseDouble(data[3]), // price
-                            Integer.parseInt(data[4]),   // stockQuantity
-                            data[5],                     // brand
-                            data[6],                     // model
-                            data[7]                      // generation
-                    );
-
-                    products.add(c);
+                if (mapper != null) {
+                    products.add(mapper.fromCsvFields(data));
                 }
             }
 
@@ -152,5 +117,39 @@ public class ProductRepository {
         }
 
         return products;
+    }
+
+    /**
+     * Converts a product to its line using the mapper that supports it.
+     * A product no mapper supports is written as an empty line, as the
+     * repository did before the mappers were introduced.
+     *
+     * @param product the product to convert
+     * @return the line to write in the file
+     */
+    private String toCsvLine(Product product) {
+        for (ProductCsvMapper mapper : mappers) {
+            if (mapper.supports(product)) {
+                return mapper.toCsvLine(product);
+            }
+        }
+
+        return "";
+    }
+
+    /**
+     * Finds the mapper that handles the given type tag.
+     *
+     * @param typeTag the value of the first column of a line
+     * @return the matching mapper, or {@code null} if the tag is unknown
+     */
+    private ProductCsvMapper findMapperByTag(String typeTag) {
+        for (ProductCsvMapper mapper : mappers) {
+            if (mapper.getTypeTag().equals(typeTag)) {
+                return mapper;
+            }
+        }
+
+        return null;
     }
 }

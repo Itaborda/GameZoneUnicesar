@@ -98,14 +98,8 @@ public class CategoryDiscount extends Promotion {
      * @return true if the product belongs to the target category, false otherwise
      */
     private boolean belongsToTargetCategory(Product product) {
-        if ("VIDEOGAME".equalsIgnoreCase(targetCategory)) {
-            return product instanceof VideoGame;
-        } else if ("CONSOLE".equalsIgnoreCase(targetCategory)) {
-            return product instanceof Console;
-        } else if ("ACCESSORY".equalsIgnoreCase(targetCategory)) {
-            return product instanceof Accessory;
-        }
-
-        return false;
+        return ProductCategory.fromName(targetCategory)
+                .map(category -> category == product.getCategory())
+                .orElse(false);
     }
 }
